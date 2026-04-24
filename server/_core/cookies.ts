@@ -46,17 +46,14 @@ function getParentDomain(hostname: string): string | undefined {
 
 export function getSessionCookieOptions(
   req: Request,
-): Pick<CookieOptions, "domain" | "httpOnly" | "path" | "sameSite" | "secure"> {
+): Pick<CookieOptions, "httpOnly" | "path" | "sameSite" | "secure"> {
   const hostname = req.hostname;
-  const domain = getParentDomain(hostname);
   const isLocalhost = LOCAL_HOSTS.has(hostname) || isIpAddress(hostname);
-  const secure = isSecureRequest(req);
 
   return {
-    domain,
     httpOnly: true,
     path: "/",
     sameSite: isLocalhost ? "lax" : "none",
-    secure: isLocalhost ? false : secure,
+    secure: !isLocalhost,
   };
 }
