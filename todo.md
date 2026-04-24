@@ -1,0 +1,96 @@
+# Project TODO
+
+- [x] Configure brand theme (dark-first with green/black/white colors)
+- [x] Generate app icon and configure branding in app.config.ts
+- [x] Set up database schema (events, songs, setlists, media, devotionals, chat, member profiles)
+- [x] Set up backend API routes (tRPC routers for all features)
+- [x] Build Login/Welcome screen
+- [x] Build Home screen with greeting, event carousel, devotional card, recent media
+- [x] Build Events screen with list and create modal
+- [x] Build Event Detail screen with RSVP
+- [x] Build Songs screen with search and segmented control (Songs/Setlists)
+- [x] Build Song Detail screen with lyrics
+- [x] Build Setlist Detail screen
+- [x] Build Members screen with grid layout
+- [x] Build Member Profile screen
+- [x] Build Media screen with grid layout
+- [x] Build Devotionals screen and detail
+- [x] Build Group Chat screen
+- [x] Build Profile/Settings screen with logout
+- [x] Configure tab bar navigation (Home, Events, Songs, Members, More)
+- [x] Add icon mappings for all tabs
+- [x] Wire up authentication flow (login/logout)
+- [x] Remove login/auth gate — app should open directly to Home
+- [x] Remove login screen redirect from all tab screens
+- [x] Update backend routes to use public procedures instead of protected
+- [x] Remove Sign Out button and profile auth references
+- [x] Update chat to work with anonymous/guest users
+- [x] Add push notifications for new events, devotionals, and chat messages
+- [x] Add "Create Devotional" form in the Devotionals section
+- [x] Enable photo/video uploads from camera roll to Media gallery
+- [x] Integrate Google Drive for accessing music files and lyrics
+- [x] Update Google Drive link to user's specific shared folder URL
+- [x] Replace app icon with user's actual "the plug" logo
+- [x] Fix devotionals + button not showing
+- [x] Add image attachment support to event creation
+- [x] Add member signup screen with name, role/instrument selection
+- [x] Include signed-up members in the group chat
+- [x] Add YouTube link support to songs (add/display in song detail)
+- [x] Add dark/light mode toggle in settings
+- [x] Add voice type selection (Soprano, Alto, Tenor, Bass, Baritone) for Vocalist role in member signup
+- [x] Add member profile editing (role, instrument, voice type, bio) on member detail screen
+- [x] Add song lyrics and chord chart editing on song detail screen
+- [x] Link chat to member profiles — messages show sender name, member picker on first use
+- [x] Add search/filter to Members directory by name, role, or instrument
+- [x] Add delete option for media images (long-press with confirmation)
+- [x] Add edit mode to Event detail screen
+- [x] Add edit mode to Song detail screen (verify/enhance existing)
+- [x] Add edit mode to Devotional detail screen
+- [x] Add date/time picker to event creation form
+- [x] Add Popl digital business card link to the More tab
+- [x] Add profile image upload for members (signup and edit)
+- [x] Add other interests section on member profiles (songwriter, photography, graphics, fashion, admin, etc.)
+- [x] Add Suggestion Board in the More tab for song suggestions, venue ideas, etc.
+- [x] Add auto-refresh polling to group chat (new messages appear every few seconds)
+- [x] Add threaded comments on suggestions (grouped replies under each suggestion)
+- [x] Fix EAS build configuration (eas.json, app version source, project ID)
+- [x] Fix 'Invalid UUID appId' EAS build error — set extra.eas.projectId to a proper UUID
+- [x] Suppress Expo Go production warning in eas.json
+- [x] Fix published web version returning 404 at theplugapp-euc5rtuf.manus.space
+- [x] Fix backend deployment build failure — expo export crashes Metro in Docker, revert build script to server-only
+- [x] Serve Expo web export from Express server so published URL works as full web app on iOS
+- [x] Fix web app asset paths for /api gateway routing — rewrite all HTML/JS paths to use /api prefix
+- [x] Fix web app navigation links broken under /api prefix (tab bar, See All, Quick Actions)
+- [x] Fix web app scrolling not working on iOS Safari
+- [x] Member portal: sign-up screen with email/password registration
+- [x] Member portal: login screen with email/password authentication
+- [x] Member portal: logged-in dashboard/profile screen
+- [x] Payment portal: member fees payment page within the portal
+- [x] Email notification to theplugworship@gmail.com when someone creates an account
+- [x] Integrate member portal into app navigation (Portal tab)
+- [x] Member portal: OAuth sign-up/login flow
+- [x] Member portal: fee status dashboard showing $150 total, paid, remaining
+- [x] Member portal: Cash App payment instructions ($theplugworship)
+- [x] Member portal: admin view to mark payments received and track who's paid
+- [x] Member portal: notify theplugworship@gmail.com on new account creation
+- [x] Database: add member_payments table for tracking fee payments
+- [x] Fix: Portal tab not working (user reported) — added experiments.baseUrl:"/api" to app.config.ts and rebuilt web export
+- [x] Fix: Portal Sign In button does nothing when tapped (user reported) — fixed getApiBaseUrl to detect deployed domain (*.manus.space) and use relative URLs, added error handling to startOAuthLogin
+- [x] Fix: Portal Sign In STILL not working on deployed site (user reported again) — root cause was iframe blocking window.location.href in web preview
+- [x] Fix: Portal Sign In button not responding in web preview iframe — changed to window.open(_top) with fallback to top.location.href
+- [x] Admin: assign/remove admin role for other users
+- [x] Admin: deactivate/reactivate user accounts
+- [x] Database: add isActive field to users table
+- [x] Admin UI: user management screen with role toggle and account deactivation
+- [x] Fix: Admin features not showing on Portal after sign-in — buildUserResponse was missing role/isActive fields, updated User type across auth chain
+- [x] Setlist: pull from existing songs library when creating/editing setlists
+- [x] Songs: add audio file upload field
+- [x] Songs: audio playback on song detail screen
+- [x] Database: add audioUrl field to songs table
+- [x] Fix: Clicking Plug icon near Publish shows "Not Found" on deployed site — added root / redirect to /api/ in production
+- [x] Fix: OAuth redirect_uri scheme '' error on Expo Go iPhone — switched native OAuth to use HTTPS server callback URL with WebBrowser.openAuthSessionAsync
+- [x] Admin: delete member profiles (DB helper, tRPC route, UI button with confirmation dialog)
+- [x] Members tab: add ability to delete members (delete button on member detail screen with confirmation dialog)
+- [x] Fix: Member delete button not working on deployed site — replaced Alert.alert with web-compatible Modal confirmation dialog
+- [x] Fix: Plug icon still showing "Not Found" on deployed site — root / is handled by gateway, not Express; this is expected behavior, app lives at /api/
+- [ ] Fix: Deployed URL breaks after working for a minute (user reported)

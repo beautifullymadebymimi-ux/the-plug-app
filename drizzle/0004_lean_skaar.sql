@@ -1,0 +1,1 @@
+ALTER TABLE `member_profiles` ADD `voiceType` varchar(64);
