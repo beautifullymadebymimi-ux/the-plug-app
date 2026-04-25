@@ -17,7 +17,7 @@ import { trpc } from "@/lib/trpc";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import * as Haptics from "expo-haptics";
 
-const TOTAL_FEE_CENTS = 15000; // $150.00
+const TOTAL_FEE_CENTS = 15000;
 
 function formatCents(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
@@ -30,62 +30,60 @@ function formatDate(dateStr: string | Date): string {
 
 export default function PortalScreen() {
   const colors = useColors();
-  const { user, loading: authLoading, isAuthenticated } = useAuth();
   const router = useRouter();
- 
+  const { user, loading: authLoading, isAuthenticated } = useAuth();
 
-  // Only fetch payment data when authenticated
   const totalQuery = trpc.payments.myTotal.useQuery(undefined, {
     enabled: isAuthenticated,
   });
+
   const paymentsQuery = trpc.payments.myPayments.useQuery(undefined, {
     enabled: isAuthenticated,
   });
-
 
   const handleCashAppPress = () => {
     if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
-    // Try to open Cash App, fall back to web
+
     const cashAppUrl = "https://cash.app/$theplugworship";
     Linking.openURL(cashAppUrl).catch(() => {
       Alert.alert("Cash App", "Send payment to $theplugworship on Cash App");
     });
   };
 
-  // Auth loading state
   if (authLoading) {
     return (
       <ScreenContainer>
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.muted }]}>Loading portal...</Text>
         </View>
       </ScreenContainer>
     );
   }
 
-  // Not authenticated — show login gate
   if (!isAuthenticated) {
     return (
       <ScreenContainer>
-        <View style={styles.loginContainer}>
-          <View style={styles.loginContent}>
-            <View style={[styles.iconCircle, { backgroundColor: colors.primary + "20" }]}>
-              <IconSymbol name="person.crop.circle" size={64} color={colors.primary} />
+        <View style={styles.loginGate}>
+          <View style={[styles.loginCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <View style={[styles.loginIconCircle, { backgroundColor: colors.primary + "18" }]}>
+              <IconSymbol name="person.crop.circle" size={58} color={colors.primary} />
             </View>
-            <Text style={[styles.loginTitle, { color: colors.foreground }]}>
-              Member Portal
-            </Text>
+
+            <Text style={[styles.loginTitle, { color: colors.foreground }]}>Member Portal</Text>
+
             <Text style={[styles.loginSubtitle, { color: colors.muted }]}>
-              Sign in to view your membership status, payment history, and manage your account.
+              Sign in to view your membership status, payment progress, and member tools.
             </Text>
+
             <Pressable
               onPress={() => router.push("/auth")}
               style={({ pressed }) => [
                 styles.loginButton,
                 { backgroundColor: colors.primary },
-                pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
+                pressed && { opacity: 0.88, transform: [{ scale: 0.98 }] },
               ]}
             >
               <Text style={styles.loginButtonText}>Sign In</Text>
@@ -96,199 +94,264 @@ export default function PortalScreen() {
     );
   }
 
-  // Authenticated — show portal dashboard
   const totalData = totalQuery.data;
   const payments = paymentsQuery.data || [];
   const isLoading = totalQuery.isLoading || paymentsQuery.isLoading;
 
+  const totalPaid = totalData?.totalPaid || 0;
+  const remaining = totalData?.remaining ?? TOTAL_FEE_CENTS;
+  const isPaidInFull = !!totalData?.isPaidInFull;
   const progressPercent = totalData
     ? Math.min((totalData.totalPaid / totalData.totalDue) * 100, 100)
     : 0;
 
-  const renderPaymentItem = ({ item }: { item: any }) => (
-    <View style={[styles.paymentRow, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      <View style={styles.paymentRowLeft}>
-        <View style={[styles.paymentIcon, { backgroundColor: colors.primary + "20" }]}>
-          <IconSymbol name="dollarsign.circle.fill" size={20} color={colors.primary} />
-        </View>
-        <View style={styles.paymentDetails}>
+  const renderPaymentItem = ({ item, index }: { item: any; index: number }) => (
+    <View style={styles.timelineRow}>
+      <View style={styles.timelineRail}>
+        <View style={[styles.timelineDot, { backgroundColor: colors.primary }]} />
+        {index !== payments.length - 1 && (
+          <View style={[styles.timelineLine, { backgroundColor: colors.border }]} />
+        )}
+      </View>
+
+      <View style={[styles.paymentRow, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={styles.paymentRowTop}>
           <Text style={[styles.paymentAmount, { color: colors.foreground }]}>
             {formatCents(item.amount)}
           </Text>
-          {item.note && (
-            <Text style={[styles.paymentNote, { color: colors.muted }]} numberOfLines={1}>
-              {item.note}
-            </Text>
+          <Text style={[styles.paymentDate, { color: colors.muted }]}>
+            {formatDate(item.createdAt)}
+          </Text>
+        </View>
+
+        <View style={styles.paymentRowBottom}>
+          <Text style={[styles.paymentNote, { color: colors.muted }]} numberOfLines={1}>
+            {item.note || "Membership payment"}
+          </Text>
+
+          {item.paymentMethod && (
+            <View style={[styles.methodPill, { backgroundColor: colors.primary + "14" }]}>
+              <Text style={[styles.methodPillText, { color: colors.primary }]}>
+                {item.paymentMethod === "cash_app" ? "Cash App" : item.paymentMethod}
+              </Text>
+            </View>
           )}
         </View>
-      </View>
-      <View style={styles.paymentRowRight}>
-        <Text style={[styles.paymentDate, { color: colors.muted }]}>
-          {formatDate(item.createdAt)}
-        </Text>
-        {item.paymentMethod && (
-          <Text style={[styles.paymentMethod, { color: colors.muted }]}>
-            {item.paymentMethod === "cash_app" ? "Cash App" : item.paymentMethod}
-          </Text>
-        )}
       </View>
     </View>
   );
 
   const ListHeader = () => (
     <View style={styles.headerContainer}>
-      {/* Greeting */}
-      <View style={styles.greetingSection}>
-        <Text style={[styles.greeting, { color: colors.muted }]}>Welcome back,</Text>
-        <Text style={[styles.userName, { color: colors.foreground }]}>
-          {user?.name || "Member"}
-        </Text>
+      <View style={[styles.heroCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={styles.heroTop}>
+          <View style={styles.heroText}>
+            <Text style={[styles.heroEyebrow, { color: colors.primary }]}>MEMBER PORTAL</Text>
+            <Text style={[styles.heroTitle, { color: colors.foreground }]}>
+              Welcome back, {user?.name?.split(" ")[0] || "Member"}.
+            </Text>
+            <Text style={[styles.heroSubtitle, { color: colors.muted }]}>
+              You’re plugged in. Track your membership, payments, and admin tools from one place.
+            </Text>
+          </View>
+
+          <View style={[styles.memberBadge, { backgroundColor: colors.primary + "18", borderColor: colors.primary + "30" }]}>
+            <IconSymbol
+              name={user?.role === "admin" ? "shield.fill" : "person.fill"}
+              size={24}
+              color={colors.primary}
+            />
+          </View>
+        </View>
+
+        <View style={styles.heroStatsRow}>
+          <View style={[styles.heroStatPill, { backgroundColor: colors.background, borderColor: colors.border }]}>
+            <Text style={[styles.heroStatLabel, { color: colors.muted }]}>Role</Text>
+            <Text style={[styles.heroStatValue, { color: colors.foreground }]}>
+              {user?.role === "admin" ? "Admin" : "Member"}
+            </Text>
+          </View>
+
+          <View style={[styles.heroStatPill, { backgroundColor: colors.background, borderColor: colors.border }]}>
+            <Text style={[styles.heroStatLabel, { color: colors.muted }]}>Status</Text>
+            <Text style={[styles.heroStatValue, { color: isPaidInFull ? colors.success : colors.primary }]}>
+              {isPaidInFull ? "Paid" : "Active"}
+            </Text>
+          </View>
+        </View>
       </View>
 
-      {/* Fee Status Card */}
-      <View style={[styles.feeCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <View style={styles.feeHeader}>
-          <Text style={[styles.feeTitle, { color: colors.foreground }]}>Membership Fee</Text>
-          {totalData?.isPaidInFull && (
-            <View style={[styles.paidBadge, { backgroundColor: colors.success + "20" }]}>
+      <View style={[styles.progressCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={styles.progressHeader}>
+          <View>
+            <Text style={[styles.sectionEyebrow, { color: colors.primary }]}>MEMBERSHIP</Text>
+            <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Fee Progress</Text>
+          </View>
+
+          {isPaidInFull ? (
+            <View style={[styles.statusBadge, { backgroundColor: colors.success + "18" }]}>
               <IconSymbol name="checkmark.circle.fill" size={14} color={colors.success} />
-              <Text style={[styles.paidBadgeText, { color: colors.success }]}>Paid</Text>
+              <Text style={[styles.statusBadgeText, { color: colors.success }]}>Paid in Full</Text>
+            </View>
+          ) : (
+            <View style={[styles.statusBadge, { backgroundColor: colors.primary + "18" }]}>
+              <Text style={[styles.statusBadgeText, { color: colors.primary }]}>In Progress</Text>
             </View>
           )}
         </View>
 
         {isLoading ? (
-          <ActivityIndicator size="small" color={colors.primary} style={{ marginVertical: 20 }} />
+          <ActivityIndicator size="small" color={colors.primary} style={{ marginVertical: 22 }} />
         ) : (
           <>
-            <View style={styles.amountRow}>
-              <View style={styles.amountBlock}>
-                <Text style={[styles.amountLabel, { color: colors.muted }]}>Paid</Text>
-                <Text style={[styles.amountValue, { color: colors.primary }]}>
-                  {formatCents(totalData?.totalPaid || 0)}
-                </Text>
+            <View style={styles.bigAmountRow}>
+              <View>
+                <Text style={[styles.bigAmountLabel, { color: colors.muted }]}>Paid so far</Text>
+                <Text style={[styles.bigAmount, { color: colors.primary }]}>{formatCents(totalPaid)}</Text>
               </View>
-              <View style={[styles.amountDivider, { backgroundColor: colors.border }]} />
-              <View style={styles.amountBlock}>
-                <Text style={[styles.amountLabel, { color: colors.muted }]}>Remaining</Text>
-                <Text style={[styles.amountValue, { color: totalData?.remaining === 0 ? colors.success : colors.foreground }]}>
-                  {formatCents(totalData?.remaining || TOTAL_FEE_CENTS)}
-                </Text>
-              </View>
-              <View style={[styles.amountDivider, { backgroundColor: colors.border }]} />
-              <View style={styles.amountBlock}>
-                <Text style={[styles.amountLabel, { color: colors.muted }]}>Total</Text>
-                <Text style={[styles.amountValue, { color: colors.foreground }]}>
-                  {formatCents(TOTAL_FEE_CENTS)}
+
+              <View style={styles.remainingBlock}>
+                <Text style={[styles.remainingLabel, { color: colors.muted }]}>Remaining</Text>
+                <Text style={[styles.remainingValue, { color: remaining === 0 ? colors.success : colors.foreground }]}>
+                  {formatCents(remaining)}
                 </Text>
               </View>
             </View>
 
-            {/* Progress Bar */}
-            <View style={styles.progressContainer}>
+            <View style={styles.progressArea}>
               <View style={[styles.progressTrack, { backgroundColor: colors.border }]}>
                 <View
                   style={[
                     styles.progressFill,
                     {
-                      backgroundColor: totalData?.isPaidInFull ? colors.success : colors.primary,
+                      backgroundColor: isPaidInFull ? colors.success : colors.primary,
                       width: `${progressPercent}%`,
                     },
                   ]}
                 />
               </View>
-              <Text style={[styles.progressText, { color: colors.muted }]}>
-                {Math.round(progressPercent)}% complete
-              </Text>
+
+              <View style={styles.progressFooter}>
+                <Text style={[styles.progressText, { color: colors.muted }]}>
+                  {Math.round(progressPercent)}% complete
+                </Text>
+                <Text style={[styles.progressText, { color: colors.muted }]}>
+                  Total {formatCents(TOTAL_FEE_CENTS)}
+                </Text>
+              </View>
             </View>
           </>
         )}
       </View>
 
-      {/* Payment Options Card */}
-      <View style={[styles.paymentOptionsCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <Text style={[styles.sectionTitle, { color: colors.foreground }]}>How to Pay</Text>
-        <Text style={[styles.paymentDescription, { color: colors.muted }]}>
-          Send your membership fee via Cash App. You can pay the full $150 or split it into 3 monthly installments of $50.
-        </Text>
+      <View style={[styles.payCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={styles.payHeader}>
+          <View style={[styles.payIcon, { backgroundColor: "#00D63220" }]}>
+            <IconSymbol name="dollarsign.circle.fill" size={24} color="#00D632" />
+          </View>
+
+          <View style={styles.payHeaderText}>
+            <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Payment Options</Text>
+            <Text style={[styles.paySubtitle, { color: colors.muted }]}>
+              Pay in full or split your membership fee into installments.
+            </Text>
+          </View>
+        </View>
 
         <Pressable
           onPress={handleCashAppPress}
           style={({ pressed }) => [
             styles.cashAppButton,
             { backgroundColor: "#00D632" },
-            pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] },
+            pressed && { opacity: 0.88, transform: [{ scale: 0.98 }] },
           ]}
         >
-          <Text style={styles.cashAppButtonText}>Pay with Cash App</Text>
-          <Text style={styles.cashAppHandle}>$theplugworship</Text>
+          <View>
+            <Text style={styles.cashAppButtonText}>Pay with Cash App</Text>
+            <Text style={styles.cashAppHandle}>$theplugworship</Text>
+          </View>
+          <IconSymbol name="arrow.up.right" size={20} color="#FFFFFF" />
         </Pressable>
 
-        <View style={styles.paymentOptionsRow}>
-          <View style={[styles.optionCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
-            <Text style={[styles.optionAmount, { color: colors.primary }]}>$150</Text>
-            <Text style={[styles.optionLabel, { color: colors.muted }]}>Pay in Full</Text>
+        <View style={styles.installmentGrid}>
+          <View style={[styles.installmentCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
+            <Text style={[styles.installmentAmount, { color: colors.foreground }]}>$150</Text>
+            <Text style={[styles.installmentLabel, { color: colors.muted }]}>Pay in Full</Text>
           </View>
-          <Text style={[styles.orText, { color: colors.muted }]}>or</Text>
-          <View style={[styles.optionCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
-            <Text style={[styles.optionAmount, { color: colors.primary }]}>3 x $50</Text>
-            <Text style={[styles.optionLabel, { color: colors.muted }]}>Monthly</Text>
+
+          <View style={[styles.installmentCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
+            <Text style={[styles.installmentAmount, { color: colors.foreground }]}>3 × $50</Text>
+            <Text style={[styles.installmentLabel, { color: colors.muted }]}>Monthly Plan</Text>
           </View>
         </View>
       </View>
 
-      {/* Admin Links */}
       {user && user.role === "admin" && (
-        <View style={styles.adminLinksContainer}>
-          <Pressable
-            onPress={() => router.push("/admin/payments" as any)}
-            style={({ pressed }) => [
-              styles.adminButton,
-              { backgroundColor: colors.surface, borderColor: colors.border },
-              pressed && { opacity: 0.8 },
-            ]}
-          >
-            <IconSymbol name="dollarsign.circle.fill" size={20} color={colors.primary} />
-            <Text style={[styles.adminButtonText, { color: colors.foreground }]}>
-              Manage Payments
-            </Text>
-            <IconSymbol name="chevron.right" size={16} color={colors.muted} />
-          </Pressable>
-          <Pressable
-            onPress={() => router.push("/admin/users" as any)}
-            style={({ pressed }) => [
-              styles.adminButton,
-              { backgroundColor: colors.surface, borderColor: colors.border },
-              pressed && { opacity: 0.8 },
-            ]}
-          >
-            <IconSymbol name="shield.fill" size={20} color={colors.primary} />
-            <Text style={[styles.adminButtonText, { color: colors.foreground }]}>
-              Manage Users
-            </Text>
-            <IconSymbol name="chevron.right" size={16} color={colors.muted} />
-          </Pressable>
+        <View style={styles.adminSection}>
+          <View>
+            <Text style={[styles.sectionEyebrow, { color: colors.primary }]}>ADMIN</Text>
+            <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Admin Console</Text>
+          </View>
+
+          <View style={styles.adminGrid}>
+            <Pressable
+              onPress={() => router.push("/admin/payments" as any)}
+              style={({ pressed }) => [
+                styles.adminCard,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+                pressed && { opacity: 0.78, transform: [{ scale: 0.98 }] },
+              ]}
+            >
+              <View style={[styles.adminIcon, { backgroundColor: colors.primary + "18" }]}>
+                <IconSymbol name="dollarsign.circle.fill" size={22} color={colors.primary} />
+              </View>
+              <Text style={[styles.adminTitle, { color: colors.foreground }]}>Payments</Text>
+              <Text style={[styles.adminDesc, { color: colors.muted }]}>Record and manage member payments.</Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => router.push("/admin/users" as any)}
+              style={({ pressed }) => [
+                styles.adminCard,
+                { backgroundColor: colors.surface, borderColor: colors.border },
+                pressed && { opacity: 0.78, transform: [{ scale: 0.98 }] },
+              ]}
+            >
+              <View style={[styles.adminIcon, { backgroundColor: colors.primary + "18" }]}>
+                <IconSymbol name="shield.fill" size={22} color={colors.primary} />
+              </View>
+              <Text style={[styles.adminTitle, { color: colors.foreground }]}>Users</Text>
+              <Text style={[styles.adminDesc, { color: colors.muted }]}>Promote, deactivate, and manage access.</Text>
+            </Pressable>
+          </View>
         </View>
       )}
 
-      {/* Payment History Header */}
       <View style={styles.historyHeader}>
-        <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Payment History</Text>
-        <Text style={[styles.historyCount, { color: colors.muted }]}>
-          {payments.length} {payments.length === 1 ? "payment" : "payments"}
-        </Text>
+        <View>
+          <Text style={[styles.sectionEyebrow, { color: colors.primary }]}>HISTORY</Text>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Payment Timeline</Text>
+        </View>
+
+        <View style={[styles.countPill, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Text style={[styles.countPillText, { color: colors.muted }]}>
+            {payments.length} {payments.length === 1 ? "payment" : "payments"}
+          </Text>
+        </View>
       </View>
     </View>
   );
 
   const ListEmpty = () => (
-    <View style={styles.emptyContainer}>
-      <IconSymbol name="doc.text.fill" size={40} color={colors.muted} />
-      <Text style={[styles.emptyText, { color: colors.muted }]}>
-        No payments recorded yet
-      </Text>
+    <View style={[styles.emptyContainer, { borderColor: colors.border }]}>
+      <View style={[styles.emptyIconCircle, { backgroundColor: colors.primary + "14" }]}>
+        <IconSymbol name="doc.text.fill" size={32} color={colors.primary} />
+      </View>
+
+      <Text style={[styles.emptyTitle, { color: colors.foreground }]}>No payments recorded yet</Text>
+
       <Text style={[styles.emptySubtext, { color: colors.muted }]}>
-        Once an admin records your payment, it will appear here.
+        Once an admin records your payment, it will appear here as part of your member timeline.
       </Text>
     </View>
   );
@@ -313,289 +376,423 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    gap: 12,
   },
-  // Login gate
-  loginContainer: {
+  loadingText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  loginGate: {
     flex: 1,
     justifyContent: "center",
-    paddingHorizontal: 32,
+    paddingHorizontal: 18,
   },
-  loginContent: {
+  loginCard: {
+    borderWidth: 1,
+    borderRadius: 30,
+    padding: 24,
     alignItems: "center",
-    gap: 16,
+    gap: 14,
   },
-  iconCircle: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+  loginIconCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 32,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 4,
   },
   loginTitle: {
-    fontSize: 28,
-    fontWeight: "800",
-    letterSpacing: -0.5,
+    fontSize: 30,
+    fontWeight: "900",
+    letterSpacing: -0.8,
+    textAlign: "center",
   },
   loginSubtitle: {
-    fontSize: 15,
+    fontSize: 14,
     textAlign: "center",
-    lineHeight: 22,
-    paddingHorizontal: 16,
+    lineHeight: 21,
+    maxWidth: 320,
   },
   loginButton: {
     width: "100%",
     paddingVertical: 16,
-    borderRadius: 50,
+    borderRadius: 18,
     alignItems: "center",
-    marginTop: 12,
+    marginTop: 4,
   },
   loginButtonText: {
     color: "#FFFFFF",
-    fontSize: 17,
-    fontWeight: "700",
-    letterSpacing: 0.3,
+    fontSize: 16,
+    fontWeight: "850",
   },
-  // Dashboard
+
   headerContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingHorizontal: 18,
+    paddingTop: 12,
+    gap: 18,
+  },
+  heroCard: {
+    borderWidth: 1,
+    borderRadius: 30,
+    padding: 20,
+    gap: 18,
+  },
+  heroTop: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 14,
+  },
+  heroText: {
+    flex: 1,
+  },
+  heroEyebrow: {
+    fontSize: 11,
+    fontWeight: "900",
+    letterSpacing: 1.4,
+    marginBottom: 8,
+  },
+  heroTitle: {
+    fontSize: 30,
+    fontWeight: "900",
+    letterSpacing: -1,
+    lineHeight: 34,
+  },
+  heroSubtitle: {
+    fontSize: 14,
+    lineHeight: 21,
+    marginTop: 10,
+  },
+  memberBadge: {
+    width: 54,
+    height: 54,
+    borderRadius: 20,
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  heroStatsRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  heroStatPill: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 12,
+  },
+  heroStatLabel: {
+    fontSize: 11,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    marginBottom: 3,
+  },
+  heroStatValue: {
+    fontSize: 15,
+    fontWeight: "850",
+  },
+
+  progressCard: {
+    borderWidth: 1,
+    borderRadius: 30,
+    padding: 20,
+    gap: 18,
+  },
+  progressHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  sectionEyebrow: {
+    fontSize: 11,
+    fontWeight: "900",
+    letterSpacing: 1.3,
+    marginBottom: 4,
+  },
+  sectionTitle: {
+    fontSize: 21,
+    fontWeight: "850",
+    letterSpacing: -0.3,
+  },
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  statusBadgeText: {
+    fontSize: 12,
+    fontWeight: "850",
+  },
+  bigAmountRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
     gap: 16,
   },
-  greetingSection: {
-    gap: 2,
-  },
-  greeting: {
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  userName: {
-    fontSize: 26,
+  bigAmountLabel: {
+    fontSize: 12,
     fontWeight: "800",
-    letterSpacing: -0.5,
-  },
-  // Fee Card
-  feeCard: {
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-  },
-  feeHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  feeTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-  },
-  paidBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
-  },
-  paidBadgeText: {
-    fontSize: 12,
-    fontWeight: "700",
-  },
-  amountRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  amountBlock: {
-    flex: 1,
-    alignItems: "center",
-    gap: 4,
-  },
-  amountLabel: {
-    fontSize: 12,
-    fontWeight: "500",
     textTransform: "uppercase",
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
+    marginBottom: 4,
   },
-  amountValue: {
-    fontSize: 22,
+  bigAmount: {
+    fontSize: 38,
+    fontWeight: "950",
+    letterSpacing: -1.2,
+  },
+  remainingBlock: {
+    alignItems: "flex-end",
+    paddingBottom: 4,
+  },
+  remainingLabel: {
+    fontSize: 12,
     fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+    marginBottom: 4,
   },
-  amountDivider: {
-    width: 1,
-    height: 36,
+  remainingValue: {
+    fontSize: 22,
+    fontWeight: "900",
   },
-  progressContainer: {
-    marginTop: 16,
-    gap: 6,
+  progressArea: {
+    gap: 8,
   },
   progressTrack: {
-    height: 8,
-    borderRadius: 4,
+    height: 10,
+    borderRadius: 999,
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
-    borderRadius: 4,
+    borderRadius: 999,
+  },
+  progressFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   progressText: {
     fontSize: 12,
-    fontWeight: "500",
-    textAlign: "right",
-  },
-  // Payment Options
-  paymentOptionsCard: {
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    gap: 12,
-  },
-  sectionTitle: {
-    fontSize: 18,
     fontWeight: "700",
   },
-  paymentDescription: {
+
+  payCard: {
+    borderWidth: 1,
+    borderRadius: 30,
+    padding: 20,
+    gap: 16,
+  },
+  payHeader: {
+    flexDirection: "row",
+    gap: 12,
+    alignItems: "flex-start",
+  },
+  payIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 19,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  payHeaderText: {
+    flex: 1,
+    gap: 4,
+  },
+  paySubtitle: {
     fontSize: 14,
     lineHeight: 20,
   },
   cashAppButton: {
-    borderRadius: 12,
+    borderRadius: 20,
     paddingVertical: 16,
+    paddingHorizontal: 16,
+    flexDirection: "row",
     alignItems: "center",
-    gap: 4,
-    marginTop: 4,
+    justifyContent: "space-between",
   },
   cashAppButtonText: {
     color: "#FFFFFF",
-    fontSize: 17,
-    fontWeight: "700",
+    fontSize: 16,
+    fontWeight: "900",
   },
   cashAppHandle: {
-    color: "rgba(255,255,255,0.85)",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  paymentOptionsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 12,
-    marginTop: 4,
-  },
-  optionCard: {
-    flex: 1,
-    alignItems: "center",
-    paddingVertical: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-    gap: 4,
-  },
-  optionAmount: {
-    fontSize: 20,
-    fontWeight: "800",
-  },
-  optionLabel: {
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  orText: {
+    color: "rgba(255,255,255,0.86)",
     fontSize: 13,
-    fontWeight: "600",
+    fontWeight: "700",
+    marginTop: 2,
   },
-  // Admin button
-  adminLinksContainer: {
+  installmentGrid: {
+    flexDirection: "row",
     gap: 10,
   },
-  adminButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-  },
-  adminButtonText: {
+  installmentCard: {
     flex: 1,
-    fontSize: 15,
-    fontWeight: "600",
-  },
-  // Payment History
-  historyHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "baseline",
-    marginTop: 4,
-  },
-  historyCount: {
-    fontSize: 13,
-    fontWeight: "500",
-  },
-  listContent: {
-    paddingBottom: 100,
-  },
-  paymentRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginHorizontal: 20,
-    marginTop: 8,
+    borderWidth: 1,
+    borderRadius: 20,
     padding: 14,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  paymentRowLeft: {
-    flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    flex: 1,
   },
-  paymentIcon: {
-    width: 36,
-    height: 36,
+  installmentAmount: {
+    fontSize: 20,
+    fontWeight: "900",
+  },
+  installmentLabel: {
+    fontSize: 12,
+    fontWeight: "700",
+    marginTop: 3,
+  },
+
+  adminSection: {
+    gap: 14,
+  },
+  adminGrid: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  adminCard: {
+    flex: 1,
+    minHeight: 150,
+    borderWidth: 1,
+    borderRadius: 24,
+    padding: 15,
+    justifyContent: "space-between",
+  },
+  adminIcon: {
+    width: 48,
+    height: 48,
     borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
   },
-  paymentDetails: {
+  adminTitle: {
+    fontSize: 16,
+    fontWeight: "900",
+  },
+  adminDesc: {
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: "600",
+  },
+
+  historyHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+    gap: 12,
+    marginTop: 2,
+  },
+  countPill: {
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  countPillText: {
+    fontSize: 12,
+    fontWeight: "800",
+  },
+
+  listContent: {
+    paddingBottom: 100,
+  },
+  timelineRow: {
+    flexDirection: "row",
+    paddingHorizontal: 18,
+    gap: 12,
+  },
+  timelineRail: {
+    width: 18,
+    alignItems: "center",
+    paddingTop: 18,
+  },
+  timelineDot: {
+    width: 11,
+    height: 11,
+    borderRadius: 999,
+  },
+  timelineLine: {
+    width: 2,
     flex: 1,
-    gap: 2,
+    marginTop: 5,
+  },
+  paymentRow: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: 22,
+    padding: 15,
+    marginBottom: 10,
+    gap: 10,
+  },
+  paymentRowTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "baseline",
+    gap: 10,
   },
   paymentAmount: {
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  paymentNote: {
-    fontSize: 13,
-  },
-  paymentRowRight: {
-    alignItems: "flex-end",
-    gap: 2,
+    fontSize: 18,
+    fontWeight: "900",
   },
   paymentDate: {
-    fontSize: 13,
-    fontWeight: "500",
+    fontSize: 12,
+    fontWeight: "700",
   },
-  paymentMethod: {
+  paymentRowBottom: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 8,
+    alignItems: "center",
+  },
+  paymentNote: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  methodPill: {
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  methodPillText: {
     fontSize: 11,
-    fontWeight: "500",
+    fontWeight: "850",
     textTransform: "capitalize",
   },
-  // Empty state
+
   emptyContainer: {
+    marginHorizontal: 18,
+    marginTop: 10,
+    borderWidth: 1,
+    borderRadius: 26,
     alignItems: "center",
-    paddingVertical: 40,
-    paddingHorizontal: 32,
-    gap: 8,
+    paddingVertical: 34,
+    paddingHorizontal: 24,
+    gap: 9,
   },
-  emptyText: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginTop: 4,
+  emptyIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 2,
+  },
+  emptyTitle: {
+    fontSize: 17,
+    fontWeight: "900",
+    textAlign: "center",
   },
   emptySubtext: {
     fontSize: 13,
     textAlign: "center",
-    lineHeight: 18,
+    lineHeight: 19,
+    maxWidth: 300,
   },
 });
