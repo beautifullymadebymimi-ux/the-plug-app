@@ -68,6 +68,19 @@ export default function MemberDetailScreen() {
     deleteMutation.mutate({ id: Number(id) });
   };
 
+  const handleDeleteWeb = () => {
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm(
+        `Are you sure you want to permanently delete ${member?.name || "this member"}? This cannot be undone.`
+      );
+      if (!confirmed) return;
+      deleteMutation.mutate({ id: Number(id) });
+      return;
+    }
+
+    handleDelete();
+  };
+
   const updateMutation = trpc.members.update.useMutation({
     onSuccess: () => {
       refetch();
@@ -164,7 +177,7 @@ export default function MemberDetailScreen() {
         <Text style={[styles.navTitle, { color: colors.foreground }]}>Member</Text>
         <View style={{ flexDirection: "row", gap: 8 }}>
           <Pressable
-            onPress={handleDelete}
+            onPress={handleDeleteWeb}
             disabled={deleteMutation.isPending}
             style={({ pressed }) => [styles.editButton, { backgroundColor: colors.error }, pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] }]}
           >
