@@ -112,11 +112,13 @@ export default function MemberDetailScreen() {
       mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.7,
+      quality: 0.2,
       base64: true,
     });
+
     if (!result.canceled && result.assets[0]) {
       const asset = result.assets[0];
+
       if (asset.base64) {
         setEditImage({
           base64: asset.base64,
