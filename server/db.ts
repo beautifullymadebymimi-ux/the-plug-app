@@ -572,3 +572,10 @@ export async function deleteUser(userId: number) {
   await db.delete(users).where(eq(users.id, userId));
 }
 
+
+export async function deleteMemberProfile(id: number) {
+  const dbConn = await getDb();
+  if (!dbConn) throw new Error("Database not available");
+
+  await dbConn.delete(memberProfiles).where(eq(memberProfiles.id, id));
+}
