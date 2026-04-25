@@ -1,4 +1,4 @@
-import { boolean, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, int, mysqlEnum, mysqlTable, text, mediumtext, timestamp, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -31,7 +31,7 @@ export const memberProfiles = mysqlTable("member_profiles", {
   instrument: varchar("instrument", { length: 128 }),
   voiceType: varchar("voiceType", { length: 64 }),
   interests: text("interests"),
-  profileImageUrl: text("profileImageUrl"),
+  profileImageUrl: mediumtext("profileImageUrl"),
   phone: varchar("phone", { length: 32 }),
   bio: text("bio"),
   avatarUrl: text("avatarUrl"),

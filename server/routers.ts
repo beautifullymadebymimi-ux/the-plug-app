@@ -113,13 +113,9 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         let profileImageUrl: string | undefined;
-        if (input.profileImageBase64) {
-          const ext = input.profileImageMimeType?.includes("png") ? "png" : "jpg";
-          const fileName = `profile_${Date.now()}.${ext}`;
-          const buffer = Buffer.from(input.profileImageBase64, "base64");
-          const result = await storagePut(fileName, buffer, input.profileImageMimeType || "image/jpeg");
-          profileImageUrl = result.url;
-        }
+      if (input.profileImageBase64) {
+  profileImageUrl = `data:${input.profileImageMimeType || "image/jpeg"};base64,${input.profileImageBase64}`;
+}
         const memberId = await db.createMemberProfile({
           name: input.name,
           role: input.role || undefined,
@@ -159,13 +155,10 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const { id, profileImageBase64, profileImageMimeType, ...data } = input;
         const updateData: Record<string, unknown> = { ...data };
-        if (profileImageBase64) {
-          const ext = profileImageMimeType?.includes("png") ? "png" : "jpg";
-          const fileName = `profile_${Date.now()}.${ext}`;
-          const buffer = Buffer.from(profileImageBase64, "base64");
-          const result = await storagePut(fileName, buffer, profileImageMimeType || "image/jpeg");
-          updateData.profileImageUrl = result.url;
-        }
+if (profileImageBase64) {
+  updateData.profileImageUrl =
+    `data:${profileImageMimeType || "image/jpeg"};base64,${profileImageBase64}`;
+}
         return db.updateMemberProfile(id, updateData);
       }),
     delete: publicProcedure
