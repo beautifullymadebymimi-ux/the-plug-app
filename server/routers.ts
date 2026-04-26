@@ -443,11 +443,28 @@ if (profileImageBase64) {
 
   home: router({
     feed: publicProcedure.query(async () => {
-      const [upcomingEvents, latestDevotional, recentMedia] = await Promise.all([
-        db.getUpcomingEvents(3),
-        db.getLatestDevotional(),
-        db.getRecentMedia(6),
-      ]);
+      let upcomingEvents = [];
+      let latestDevotional = null;
+      let recentMedia = [];
+
+      try {
+        upcomingEvents = await db.getUpcomingEvents(3);
+      } catch (error) {
+        console.error("[home.feed] upcomingEvents failed:", error);
+      }
+
+      try {
+        latestDevotional = await db.getLatestDevotional();
+      } catch (error) {
+        console.error("[home.feed] latestDevotional failed:", error);
+      }
+
+      try {
+        recentMedia = await db.getRecentMedia(6);
+      } catch (error) {
+        console.error("[home.feed] recentMedia failed:", error);
+      }
+
       return { upcomingEvents, latestDevotional, recentMedia };
     }),
   }),
