@@ -123,7 +123,7 @@ app.post("/api/auth/login", async (req, res) => {
     const cookieOptions = getSessionCookieOptions(req);
     res.cookie(COOKIE_NAME, sessionToken, cookieOptions);
 
-    return res.json({ user });
+    return res.json({ user, sessionToken });
   } catch (error) {
     console.error("[Auth Login Error]", error);
     return res.status(500).json({ error: "Login failed." });

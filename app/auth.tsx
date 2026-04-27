@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { trpc } from "@/lib/trpc";
+import { Auth } from "@/lib/auth";
 
 export default function AuthScreen() {
   const colors = useColors();
@@ -17,6 +18,10 @@ export default function AuthScreen() {
 
   const signupMutation = trpc.auth.signup.useMutation({
     onSuccess: async () => {
+      if (data.sessionToken) {
+        await Auth.setSessionToken(data.sessionToken);
+      }
+
       await utils.auth.me.invalidate();
       router.replace("/(tabs)/portal");
     },
@@ -42,6 +47,10 @@ export default function AuthScreen() {
 
       if (!response.ok) {
         throw new Error(data.error || "Could not log in.");
+      }
+
+      if (data.sessionToken) {
+        await Auth.setSessionToken(data.sessionToken);
       }
 
       await utils.auth.me.invalidate();
