@@ -29,6 +29,7 @@ export default function AuthScreen() {
     setLoginLoading(true);
     try {
       const response = await fetch(`${process.env.EXPO_PUBLIC_API_BASE_URL}/api/auth/login`, {
+    credentials: "include",
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
