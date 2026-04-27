@@ -194,8 +194,8 @@ if (profileImageBase64) {
   return db.createEvent({
     title: input.title,
     description: input.description,
-    date: input.date.replace("T", " ").split(".")[0],
-    endDate: input.endDate ? input.endDate.replace("T", " ").split(".")[0] : undefined,
+    date: new Date(input.date),
+    endDate: input.endDate ? new Date(input.endDate) : undefined,
     location: input.location,
     type: input.type,
     imageUrl,
@@ -305,7 +305,7 @@ if (profileImageBase64) {
       }))
       .mutation(({ input }) => db.createSetlist({
         ...input,
-        date: input.date ? input.date.replace("T", " ").split(".")[0] : undefined,
+        date: input.date ? new Date(input.date) : undefined,
         createdBy: 0,
       })),
     songs: publicProcedure
@@ -371,7 +371,7 @@ if (profileImageBase64) {
       }))
       .mutation(({ input }) => db.createDevotional({
         ...input,
-        date: input.date.replace("T", " ").split(".")[0],
+        date: new Date(input.date),
         createdBy: 0,
       })),
     update: publicProcedure
