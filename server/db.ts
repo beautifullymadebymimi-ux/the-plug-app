@@ -192,20 +192,7 @@ export async function getEventById(id: number) {
 export async function createEvent(data: InsertEvent) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-
-  const cleanDate = (value: unknown) => {
-    if (!value) return undefined;
-    const d = value instanceof Date ? value : new Date(String(value));
-    d.setMilliseconds(0);
-    return d;
-  };
-
-  const result = await db.insert(events).values({
-    ...data,
-    date: cleanDate(data.date)!,
-    endDate: cleanDate(data.endDate),
-  });
-
+  const result = await db.insert(events).values(data);
   return result[0].insertId;
 }
 
