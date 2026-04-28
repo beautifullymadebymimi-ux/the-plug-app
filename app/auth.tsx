@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { trpc } from "@/lib/trpc";
+import * as Auth from "@/lib/_core/auth";
 
 export default function AuthScreen() {
   const colors = useColors();
