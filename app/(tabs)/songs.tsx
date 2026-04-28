@@ -21,6 +21,7 @@ export default function SongsScreen() {
   const [newTempo, setNewTempo] = useState("");
   const [newLyrics, setNewLyrics] = useState("");
   const [newYoutubeUrl, setNewYoutubeUrl] = useState("");
+  const [newSpotifyUrl, setNewSpotifyUrl] = useState("");
 
   // Setlist creation state
   const [showCreateSetlist, setShowCreateSetlist] = useState(false);
@@ -35,7 +36,7 @@ export default function SongsScreen() {
   const createSetlist = trpc.setlists.create.useMutation();
   const addSongToSetlist = trpc.setlists.addSong.useMutation();
 
-  const resetSongForm = () => { setNewTitle(""); setNewArtist(""); setNewKey(""); setNewTempo(""); setNewLyrics(""); setNewYoutubeUrl(""); };
+  const resetSongForm = () => { setNewTitle(""); setNewArtist(""); setNewKey(""); setNewTempo(""); setNewLyrics(""); setNewYoutubeUrl(""); setNewSpotifyUrl(""); };
   const resetSetlistForm = () => { setSetlistTitle(""); setSetlistDate(""); setSelectedSongIds([]); setSongSearch(""); };
 
   const filteredSongs = (songsList || []).filter(s =>
@@ -62,6 +63,7 @@ export default function SongsScreen() {
       tempo: newTempo ? parseInt(newTempo) : undefined,
       lyrics: newLyrics.trim() || undefined,
       youtubeUrl: newYoutubeUrl.trim() || undefined,
+      spotifyUrl: newSpotifyUrl.trim() || undefined,
     });
   };
 
@@ -180,6 +182,11 @@ export default function SongsScreen() {
                       <Text style={[styles.keyText, { color: "#FF0000" }]}>YT</Text>
                     </View>
                   )}
+                  {item.spotifyUrl && (
+                    <View style={[styles.keyBadge, { backgroundColor: "#1DB95420" }]}>
+                      <Text style={[styles.keyText, { color: "#1DB954" }]}>SP</Text>
+                    </View>
+                  )}
                   {item.songKey && (
                     <View style={[styles.keyBadge, { backgroundColor: colors.primary + "20" }]}>
                       <Text style={[styles.keyText, { color: colors.primary }]}>{item.songKey}</Text>
@@ -248,7 +255,8 @@ export default function SongsScreen() {
                 </View>
               </View>
               <Text style={[styles.inputLabel, { color: colors.muted }]}>YouTube Link</Text>
-              <TextInput value={newYoutubeUrl} onChangeText={setNewYoutubeUrl} placeholder="https://youtube.com/watch?v=..." placeholderTextColor={colors.muted} autoCapitalize="none" keyboardType="url" style={[styles.input, { backgroundColor: colors.surface, color: colors.foreground, borderColor: colors.border }]} />
+              <TextInput value={newYoutubeUrl} onChangeText={setNewYoutubeUrl} placeholder="YouTube URL" placeholderTextColor={colors.muted} autoCapitalize="none" keyboardType="url" style={[styles.input, { backgroundColor: colors.surface, color: colors.foreground, borderColor: colors.border }]} />
+              <TextInput value={newSpotifyUrl} onChangeText={setNewSpotifyUrl} placeholder="Spotify URL" placeholderTextColor={colors.muted} autoCapitalize="none" keyboardType="url" style={[styles.input, { backgroundColor: colors.surface, color: colors.foreground, borderColor: colors.border }]} />
               <Text style={[styles.inputLabel, { color: colors.muted }]}>Lyrics</Text>
               <TextInput value={newLyrics} onChangeText={setNewLyrics} placeholder="Paste lyrics here..." placeholderTextColor={colors.muted} multiline style={[styles.input, styles.textArea, { backgroundColor: colors.surface, color: colors.foreground, borderColor: colors.border }]} />
             </ScrollView>
