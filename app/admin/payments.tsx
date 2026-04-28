@@ -114,6 +114,14 @@ export default function AdminPaymentsScreen() {
   };
 
   const handleDeletePayment = (paymentId: number) => {
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm("Are you sure you want to delete this payment record?");
+      if (confirmed) {
+        deleteMutation.mutate({ id: paymentId });
+      }
+      return;
+    }
+
     Alert.alert(
       "Delete Payment",
       "Are you sure you want to delete this payment record?",
