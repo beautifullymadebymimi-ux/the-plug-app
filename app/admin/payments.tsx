@@ -234,6 +234,34 @@ export default function AdminPaymentsScreen() {
     );
   };
 
+  const renderPaymentItem = (payment: any) => (
+    <View
+      key={payment.id}
+      style={[styles.paymentRecordCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+    >
+      <View style={{ flex: 1 }}>
+        <Text style={[styles.paymentRecordName, { color: colors.foreground }]}>
+          {payment.name || payment.email || "Unknown member"}
+        </Text>
+        <Text style={[styles.paymentRecordMeta, { color: colors.muted }]}>
+          {formatCents(payment.amount)} • {payment.paymentMethod || "payment"} • {payment.createdAt || ""}
+        </Text>
+        {!!payment.note && (
+          <Text style={[styles.paymentRecordMeta, { color: colors.muted }]} numberOfLines={1}>
+            {payment.note}
+          </Text>
+        )}
+      </View>
+
+      <Pressable
+        onPress={() => handleDeletePayment(payment.id)}
+        style={({ pressed }) => [styles.deletePaymentButton, pressed && { opacity: 0.7 }]}
+      >
+        <IconSymbol name="trash.fill" size={18} color={colors.error || "#EF4444"} />
+      </Pressable>
+    </View>
+  );
+
   const ListHeader = () => (
     <View style={styles.headerContainer}>
       {/* Top Nav */}
@@ -268,6 +296,14 @@ export default function AdminPaymentsScreen() {
           <Text style={[styles.statLabel, { color: colors.muted }]}>Collected</Text>
         </View>
       </View>
+
+      {/* Recent Payments */}
+      {allPayments.length > 0 && (
+        <View style={styles.recentPaymentsSection}>
+          <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Recent Payments</Text>
+          {allPayments.map(renderPaymentItem)}
+        </View>
+      )}
 
       {/* Section Title */}
       <Text style={[styles.sectionTitle, { color: colors.foreground }]}>All Members</Text>
