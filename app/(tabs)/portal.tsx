@@ -280,8 +280,8 @@ export default function PortalScreen() {
           </View>
 
           <View style={[styles.installmentCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
-            <Text style={[styles.installmentAmount, { color: colors.foreground }]}>3 × $50</Text>
-            <Text style={[styles.installmentLabel, { color: colors.muted }]}>Monthly Plan</Text>
+            <Text style={[styles.installmentAmount, { color: colors.foreground }]}>4 × $25</Text>
+            <Text style={[styles.installmentLabel, { color: colors.muted }]}>4 Payment Plan</Text>
           </View>
         </View>
       </View>
