@@ -134,6 +134,7 @@ export const songs = mysqlTable("songs", {
 	notes: text(),
 	youtubeUrl: text(),
 	spotifyUrl: text(),
+	appleMusicUrl: text(),
 	createdBy: int().notNull(),
 	createdAt: timestamp({ mode: 'string' }).default(sql`(now())`).notNull(),
 	updatedAt: timestamp({ mode: 'string' }).default(sql`(now())`).onUpdateNow().notNull(),

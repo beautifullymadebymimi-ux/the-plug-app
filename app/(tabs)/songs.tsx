@@ -22,6 +22,7 @@ export default function SongsScreen() {
   const [newLyrics, setNewLyrics] = useState("");
   const [newYoutubeUrl, setNewYoutubeUrl] = useState("");
   const [newSpotifyUrl, setNewSpotifyUrl] = useState("");
+  const [newAppleMusicUrl, setNewAppleMusicUrl] = useState("");
 
   // Setlist creation state
   const [showCreateSetlist, setShowCreateSetlist] = useState(false);
@@ -36,7 +37,8 @@ export default function SongsScreen() {
   const createSetlist = trpc.setlists.create.useMutation();
   const addSongToSetlist = trpc.setlists.addSong.useMutation();
 
-  const resetSongForm = () => { setNewTitle(""); setNewArtist(""); setNewKey(""); setNewTempo(""); setNewLyrics(""); setNewYoutubeUrl(""); setNewSpotifyUrl(""); };
+  const resetSongForm = () => { setNewTitle(""); setNewArtist(""); setNewKey(""); setNewTempo(""); setNewLyrics(""); setNewYoutubeUrl(""); setNewSpotifyUrl("");
+    setNewAppleMusicUrl(""); };
   const resetSetlistForm = () => { setSetlistTitle(""); setSetlistDate(""); setSelectedSongIds([]); setSongSearch(""); };
 
   const filteredSongs = (songsList || []).filter(s =>
@@ -64,6 +66,7 @@ export default function SongsScreen() {
       lyrics: newLyrics.trim() || undefined,
       youtubeUrl: newYoutubeUrl.trim() || undefined,
       spotifyUrl: newSpotifyUrl.trim() || undefined,
+      appleMusicUrl: newAppleMusicUrl.trim() || undefined,
     });
   };
 
@@ -199,6 +202,22 @@ export default function SongsScreen() {
                       <Text style={[styles.keyText, { color: "#1DB954" }]}>SP</Text>
                     </Pressable>
                   )}
+                  {item.appleMusicUrl && (
+                    <Pressable
+                      onPress={() => openSongUrl(item.appleMusicUrl)}
+                      style={[styles.keyBadge, { backgroundColor: "#FC3C4420" }]}
+                    >
+                      <Text style={[styles.keyText, { color: "#FC3C44" }]}>AM</Text>
+                    </Pressable>
+                  )}
+                  {item.spotifyUrl && (
+                    <Pressable
+                      onPress={() => openSongUrl(item.spotifyUrl)}
+                      style={[styles.keyBadge, { backgroundColor: "#1DB95420" }]}
+                    >
+                      <Text style={[styles.keyText, { color: "#1DB954" }]}>SP</Text>
+                    </Pressable>
+                  )}
                   {item.songKey && (
                     <View style={[styles.keyBadge, { backgroundColor: colors.primary + "20" }]}>
                       <Text style={[styles.keyText, { color: colors.primary }]}>{item.songKey}</Text>
@@ -268,7 +287,10 @@ export default function SongsScreen() {
               </View>
               <Text style={[styles.inputLabel, { color: colors.muted }]}>YouTube Link</Text>
               <TextInput value={newYoutubeUrl} onChangeText={setNewYoutubeUrl} placeholder="YouTube URL" placeholderTextColor={colors.muted} autoCapitalize="none" keyboardType="url" style={[styles.input, { backgroundColor: colors.surface, color: colors.foreground, borderColor: colors.border }]} />
-              <TextInput value={newSpotifyUrl} onChangeText={setNewSpotifyUrl} placeholder="Spotify URL" placeholderTextColor={colors.muted} autoCapitalize="none" keyboardType="url" style={[styles.input, { backgroundColor: colors.surface, color: colors.foreground, borderColor: colors.border }]} />
+              <TextInput value={newSpotifyUrl} onChangeText={setNewSpotifyUrl} placeholder="Spotify URL"
+              />
+              <TextInput value={newAppleMusicUrl} onChangeText={setNewAppleMusicUrl} placeholder="Apple Music URL" placeholderTextColor={colors.muted} autoCapitalize="none" keyboardType="url" style={[styles.input, { backgroundColor: colors.surface, color: colors.foreground, borderColor: colors.border }]}
+ placeholderTextColor={colors.muted} autoCapitalize="none" keyboardType="url" style={[styles.input, { backgroundColor: colors.surface, color: colors.foreground, borderColor: colors.border }]} />
               <Text style={[styles.inputLabel, { color: colors.muted }]}>Lyrics</Text>
               <TextInput value={newLyrics} onChangeText={setNewLyrics} placeholder="Paste lyrics here..." placeholderTextColor={colors.muted} multiline style={[styles.input, styles.textArea, { backgroundColor: colors.surface, color: colors.foreground, borderColor: colors.border }]} />
             </ScrollView>

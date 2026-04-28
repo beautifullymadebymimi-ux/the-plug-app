@@ -28,6 +28,7 @@ export default function SongDetailScreen() {
   const [editTitle, setEditTitle] = useState("");
   const [editYoutubeUrl, setEditYoutubeUrl] = useState("");
   const [editSpotifyUrl, setEditSpotifyUrl] = useState("");
+  const [editAppleMusicUrl, setEditAppleMusicUrl] = useState("");
   const [uploading, setUploading] = useState(false);
 
   // Audio player for the song's audio file
@@ -159,6 +160,7 @@ export default function SongDetailScreen() {
       setEditTempo(song.tempo ? String(song.tempo) : "");
       setEditYoutubeUrl(song.youtubeUrl || "");
       setEditSpotifyUrl(song.spotifyUrl || "");
+      setEditAppleMusicUrl(song.appleMusicUrl || "");
     }
   }, [song, showEdit]);
 
@@ -177,6 +179,7 @@ export default function SongDetailScreen() {
       tempo: editTempo ? Number(editTempo) : undefined,
       youtubeUrl: editYoutubeUrl.trim() || undefined,
       spotifyUrl: editSpotifyUrl.trim() || undefined,
+      appleMusicUrl: editAppleMusicUrl.trim() || undefined,
     });
   };
 
@@ -366,6 +369,21 @@ export default function SongDetailScreen() {
               <Text style={styles.spotifyUrl} numberOfLines={1}>{song.spotifyUrl}</Text>
             </View>
             <IconSymbol name="chevron.right" size={18} color="#FFF" style={{ opacity: 0.6 }} />
+          </Pressable>
+        )}
+
+        {song.appleMusicUrl && (
+          <Pressable
+            onPress={() => Linking.openURL(song.appleMusicUrl!)}
+            style={({ pressed }) => [styles.spotifyCard, pressed && { opacity: 0.8 }]}
+          >
+            <View style={styles.spotifyIcon}>
+              <IconSymbol name="music.note" size={24} color="#FFF" />
+            </View>
+            <View style={styles.spotifyContent}>
+              <Text style={styles.spotifyTitle}>Open in Apple Music</Text>
+              <Text style={styles.spotifyUrl} numberOfLines={1}>{song.appleMusicUrl}</Text>
+            </View>
           </Pressable>
         )}
 
