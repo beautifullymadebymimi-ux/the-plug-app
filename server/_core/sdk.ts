@@ -182,10 +182,7 @@ async verifySession(
   cookieValue: string | undefined | null,
 ): Promise<{ openId: string; appId: string; name: string } | null> {
   console.log("[SESSION] cookie present:", !!cookieValue);
-  console.log(
-    "[SESSION] cookie preview:",
-    cookieValue ? cookieValue.slice(0, 25) : "none",
-  );
+  console.log("[SESSION] cookie preview:", cookieValue ? cookieValue.slice(0, 25) : "none");
 
   if (!cookieValue) {
     console.warn("[Auth] Missing session cookie");
@@ -199,46 +196,24 @@ async verifySession(
       algorithms: ["HS256"],
     });
 
- const openId = typeof payload.openId === "string" ? payload.openId : null;
-const appId =
-  typeof payload.appId === "string" && payload.appId.length > 0
-    ? payload.appId
-    : "local";
-const name = typeof payload.name === "string" ? payload.name : "";
+    const openId = typeof payload.openId === "string" ? payload.openId : null;
+    const appId =
+      typeof payload.appId === "string" && payload.appId.length > 0
+        ? payload.appId
+        : "local";
+    const name = typeof payload.name === "string" ? payload.name : "";
 
-if (!openId) {
-  console.warn("[SESSION] Missing required payload fields");
-  return null;
-}
+    if (!openId) {
+      console.warn("[SESSION] Missing required payload fields");
+      return null;
+    }
 
-return { openId, appId, name };
+    return { openId, appId, name };
   } catch (error) {
-    console.error("[SESSION] verify failed:", error);
+    console.warn("[SESSION] Failed to verify session:", error);
     return null;
   }
 }
-
-  async getUserInfoWithJwt(jwtToken: string): Promise<GetUserInfoWithJwtResponse> {
-    const payload: GetUserInfoWithJwtRequest = {
-      jwtToken,
-      projectId: ENV.appId,
-    };
-
-    const { data } = await this.client.post<GetUserInfoWithJwtResponse>(
-      GET_USER_INFO_WITH_JWT_PATH,
-      payload,
-    );
-
-    const loginMethod = this.deriveLoginMethod(
-      (data as any)?.platforms,
-      (data as any)?.platform ?? data.platform ?? null,
-    );
-    return {
-      ...(data as any),
-      platform: loginMethod,
-      loginMethod,
-    } as GetUserInfoWithJwtResponse;
-  }
 
   async authenticateRequest(req: Request): Promise<User> {
     // Regular authentication flow
