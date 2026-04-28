@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { FlatList, Text, View, Pressable, StyleSheet, TextInput, Modal, ScrollView, Platform, Linking } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { trpc } from "@/lib/trpc";
@@ -10,6 +10,8 @@ import * as Haptics from "expo-haptics";
 export default function SongsScreen() {
   const colors = useColors();
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const pickForSetlist = params.pickForSetlist ? Number(params.pickForSetlist) : null;
   const [segment, setSegment] = useState<"songs" | "setlists">("songs");
   const [search, setSearch] = useState("");
 
@@ -119,7 +121,7 @@ export default function SongsScreen() {
   return (
     <ScreenContainer>
       <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.foreground }]}>Songs</Text>
+        <Text style={[styles.title, { color: colors.foreground }]}>{pickForSetlist ? "Pick Song For Setlist" : "Songs"}</Text>
         <Pressable
           onPress={handleAddPress}
           style={({ pressed }) => [styles.addButton, { backgroundColor: colors.primary }, pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] }]}
@@ -170,7 +172,17 @@ export default function SongsScreen() {
             }
             renderItem={({ item }) => (
               <Pressable
-                onPress={() => router.push(`/song/${item.id}` as any)}
+                onPress={() => {
+  if (pickForSetlist) {
+    addToSetlistMutation.mutate({
+      setlistId: pickForSetlist,
+      songId: item.id,
+      orderIndex: 0
+    });
+  } else {
+    router.push(`/song/${item.id}` as any);
+  }
+}}
                 style={({ pressed }) => [styles.songCard, { backgroundColor: colors.surface, borderColor: colors.border }, pressed && { opacity: 0.7 }]}
               >
                 <View style={[styles.songIcon, { backgroundColor: colors.primary + "20" }]}>
