@@ -256,10 +256,11 @@ export async function createSong(data: any) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const result = await db.execute(
-    `INSERT INTO songs (title, createdBy) VALUES (?, ?)`,
-    [data.title || "Untitled", 1]
-  );
+  const result = await db.insert(songs).values({
+    title: data?.title || "Untitled",
+    createdBy: 1,
+  });
+
   return result;
 }
 
