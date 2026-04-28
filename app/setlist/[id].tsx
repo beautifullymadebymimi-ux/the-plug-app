@@ -1,4 +1,4 @@
-import { Text, View, Pressable, StyleSheet, FlatList } from "react-native";
+import { Text, View, Pressable, StyleSheet, FlatList, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
@@ -11,6 +11,20 @@ export default function SetlistDetailScreen() {
   const router = useRouter();
   const { data: setlist } = trpc.setlists.byId.useQuery({ id: Number(id) }, { enabled: !!id });
   const { data: setlistSongs } = trpc.setlists.songs.useQuery({ setlistId: Number(id) }, { enabled: !!id });
+
+  const utils = trpc.useUtils();
+
+  const removeMutation = trpc.setlists.removeSong.useMutation({
+    onSuccess: () => utils.setlists.songs.invalidate(),
+  });
+
+  const removeSong = (rowId:number) => {
+    Alert.alert("Remove Song","Remove this song from setlist?",[
+      { text:"Cancel", style:"cancel" },
+      { text:"Remove", style:"destructive", onPress:()=>removeMutation.mutate({id:rowId}) }
+    ]);
+  };
+
 
   if (!setlist) {
     return (
@@ -27,7 +41,12 @@ export default function SetlistDetailScreen() {
       <View style={styles.navBar}>
         <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backButton, { backgroundColor: colors.surface }, pressed && { opacity: 0.7 }]}>
           <IconSymbol name="arrow.left" size={20} color={colors.foreground} />
-        </Pressable>
+        
+<Pressable onPress={() => removeSong(item.id)}>
+  <IconSymbol name="trash" size={18} color="#ff4d4f" />
+</Pressable>
+</Pressable>
+
         <Text style={[styles.navTitle, { color: colors.foreground }]}>Setlist</Text>
         <View style={{ width: 40 }} />
       </View>
@@ -43,6 +62,19 @@ export default function SetlistDetailScreen() {
           {setlistSongs?.length || 0} songs
         </Text>
       </View>
+
+      <Pressable
+        onPress={() => router.push(`/songs?pickForSetlist=${id}` as any)}
+        style={{
+          marginHorizontal:20,
+          marginBottom:14,
+          backgroundColor:colors.primary,
+          paddingVertical:14,
+          borderRadius:14,
+          alignItems:"center"
+        }}>
+        <Text style={{color:"white",fontWeight":"800"}}>+ Add Song</Text>
+      </Pressable>
 
       <FlatList
         data={setlistSongs || []}
@@ -73,7 +105,16 @@ export default function SetlistDetailScreen() {
                 </Text>
               )}
             </View>
-            {item.song?.songKey && (
+            
+<View style={{flexDirection:"row", gap:6}}>
+{item.song?.youtubeUrl && <Text style={{fontSize:11,color:"#ff4444",fontWeight:"700"}}>YT</Text>}
+{item.song?.spotifyUrl && <Text style={{fontSize:11,color:"#1DB954",fontWeight:"700"}}>SP</Text>}
+{item.song?.appleMusicUrl && <Text style={{fontSize:11,color:"#fa2d48",fontWeight:"700"}}>AM</Text>}
+{item.song?.audioUrl && <Text style={{fontSize:11,color:"#4da6ff",fontWeight:"700"}}>AUD</Text>}
+</View>
+
+{item.song?.songKey && (
+
               <View style={[styles.keyBadge, { backgroundColor: colors.primary + "20" }]}>
                 <Text style={[styles.keyText, { color: colors.primary }]}>{item.song.songKey}</Text>
               </View>
