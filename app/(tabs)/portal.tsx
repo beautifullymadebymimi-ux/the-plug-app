@@ -31,7 +31,7 @@ function formatDate(dateStr: string | Date): string {
 export default function PortalScreen() {
   const colors = useColors();
   const router = useRouter();
-  const { user, loading: authLoading, isAuthenticated, logout, fetchUser } = useAuth();
+  const { user, loading: authLoading, isAuthenticated, logout } = useAuth();
 
   const totalQuery = trpc.payments.myTotal.useQuery(undefined, {
     enabled: isAuthenticated,
