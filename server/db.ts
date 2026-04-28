@@ -252,11 +252,12 @@ export async function getSongById(id: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-export async function createSong(data: InsertSong) {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-  const result = await db.insert(songs).values(data);
-  return result[0].insertId;
+export async function createSong(data: any) {
+  const result = await db.execute(
+    `INSERT INTO songs (title, createdBy) VALUES (?, ?)`,
+    [data.title || "Untitled", Number(data.createdBy || 1)]
+  );
+  return result;
 }
 
 export async function updateSong(id: number, data: Partial<InsertSong>) {
