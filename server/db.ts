@@ -258,6 +258,14 @@ export async function createSong(data: any) {
 
   const result = await db.insert(songs).values({
     title: data?.title || "Untitled",
+    artist: data?.artist || "",
+    songKey: data?.songKey || "",
+    tempo: data?.tempo || 0,
+    lyrics: data?.lyrics || "",
+    notes: data?.notes || "",
+    youtubeUrl: data?.youtubeUrl || "",
+    spotifyUrl: data?.spotifyUrl || "",
+    audioUrl: data?.audioUrl || "",
     createdBy: 1,
   });
 
