@@ -160,7 +160,7 @@ export default function SongDetailScreen() {
       setEditTempo(song.tempo ? String(song.tempo) : "");
       setEditYoutubeUrl(song.youtubeUrl || "");
       setEditSpotifyUrl(song.spotifyUrl || "");
-      setEditAppleMusicUrl(song.appleMusicUrl || "");
+      setEditAppleMusicUrl(song.spotifyUrl || "");
     }
   }, [song, showEdit]);
 
@@ -179,7 +179,7 @@ export default function SongDetailScreen() {
       tempo: editTempo ? Number(editTempo) : undefined,
       youtubeUrl: editYoutubeUrl.trim() || undefined,
       spotifyUrl: editSpotifyUrl.trim() || undefined,
-      appleMusicUrl: editAppleMusicUrl.trim() || undefined,
+      // spotifyUrl: editAppleMusicUrl.trim() || undefined,
     });
   };
 
@@ -372,9 +372,9 @@ export default function SongDetailScreen() {
           </Pressable>
         )}
 
-        {song.appleMusicUrl && (
+        {song.spotifyUrl && (
           <Pressable
-            onPress={() => Linking.openURL(song.appleMusicUrl!)}
+            onPress={() => Linking.openURL(song.spotifyUrl!)}
             style={({ pressed }) => [styles.spotifyCard, pressed && { opacity: 0.8 }]}
           >
             <View style={styles.spotifyIcon}>
@@ -382,7 +382,7 @@ export default function SongDetailScreen() {
             </View>
             <View style={styles.spotifyContent}>
               <Text style={styles.spotifyTitle}>Open in Apple Music</Text>
-              <Text style={styles.spotifyUrl} numberOfLines={1}>{song.appleMusicUrl}</Text>
+              <Text style={styles.spotifyUrl} numberOfLines={1}>{song.spotifyUrl}</Text>
             </View>
           </Pressable>
         )}

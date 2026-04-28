@@ -66,7 +66,7 @@ export default function SongsScreen() {
       lyrics: newLyrics.trim() || undefined,
       youtubeUrl: newYoutubeUrl.trim() || undefined,
       spotifyUrl: newSpotifyUrl.trim() || undefined,
-      appleMusicUrl: newAppleMusicUrl.trim() || undefined,
+      // spotifyUrl: newAppleMusicUrl.trim() || undefined,
     });
   };
 
@@ -202,9 +202,9 @@ export default function SongsScreen() {
                       <Text style={[styles.keyText, { color: "#1DB954" }]}>SP</Text>
                     </Pressable>
                   )}
-                  {item.appleMusicUrl && (
+                  {item.spotifyUrl && (
                     <Pressable
-                      onPress={() => openSongUrl(item.appleMusicUrl)}
+                      onPress={() => openSongUrl(item.spotifyUrl)}
                       style={[styles.keyBadge, { backgroundColor: "#FC3C4420" }]}
                     >
                       <Text style={[styles.keyText, { color: "#FC3C44" }]}>AM</Text>
