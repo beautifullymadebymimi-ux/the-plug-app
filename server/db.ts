@@ -255,7 +255,7 @@ export async function getSongById(id: number) {
 export async function createSong(data: any) {
   const result = await db.execute(
     `INSERT INTO songs (title, createdBy) VALUES (?, ?)`,
-    [data.title || "Untitled", Number(data.createdBy || 1)]
+    [data.title || "Untitled", 1]
   );
   return result;
 }
