@@ -59,7 +59,7 @@ function buildUserResponse(
     name: user?.name ?? null,
     email: user?.email ?? null,
     loginMethod: user?.loginMethod ?? null,
-    lastSignedIn: (user?.lastSignedIn ?? new Date()).toISOString(),
+    lastSignedIn: (user?.lastSignedIn ?? new Date()) ,
     role: (user as any)?.role ?? "user",
     isActive: (user as any)?.isActive ?? true,
   };
