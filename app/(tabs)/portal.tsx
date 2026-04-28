@@ -31,7 +31,7 @@ function formatDate(dateStr: string | Date): string {
 export default function PortalScreen() {
   const colors = useColors();
   const router = useRouter();
-  const { user, loading: authLoading, isAuthenticated } = useAuth();
+  const { user, loading: authLoading, isAuthenticated, logout, fetchUser } = useAuth();
 
   const totalQuery = trpc.payments.myTotal.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -94,7 +94,13 @@ export default function PortalScreen() {
     );
   }
 
-  const totalData = totalQuery.data;
+  
+const handleLogout = async () => {
+  await logout();
+  router.replace("/auth");
+};
+
+const totalData = totalQuery.data;
   const payments = paymentsQuery.data || [];
   const isLoading = totalQuery.isLoading || paymentsQuery.isLoading;
 
@@ -105,7 +111,26 @@ export default function PortalScreen() {
     ? Math.min((totalData.totalPaid / totalData.totalDue) * 100, 100)
     : 0;
 
-  const renderPaymentItem = ({ item, index }: { item: any; index: number }) => (
+  
+const LogoutButton = () => (
+  <Pressable
+    onPress={handleLogout}
+    style={{
+      marginBottom: 14,
+      paddingVertical: 10,
+      paddingHorizontal: 14,
+      borderRadius: 10,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignSelf: "flex-end"
+    }}
+  >
+    <Text style={{ color: colors.foreground, fontWeight: "600" }}>Log Out</Text>
+  </Pressable>
+);
+
+const renderPaymentItem = ({ item, index }: { item: any; index: number }) => (
     <View style={styles.timelineRow}>
       <View style={styles.timelineRail}>
         <View style={[styles.timelineDot, { backgroundColor: colors.primary }]} />
@@ -200,7 +225,9 @@ export default function PortalScreen() {
           )}
         </View>
 
-        {isLoading ? (
+        <LogoutButton />
+
+{isLoading ? (
           <ActivityIndicator size="small" color={colors.primary} style={{ marginVertical: 22 }} />
         ) : (
           <>

@@ -31,11 +31,11 @@ function formatDate(dateStr: string | Date): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-type PaymentAmount = 5000 | 10000;
+type PaymentAmount = 2500 | 10000;
 type PaymentMethod = "cash_app" | "zelle" | "cash" | "other";
 
 const AMOUNT_OPTIONS: { value: PaymentAmount; label: string }[] = [
-  { value: 5000, label: "$50 — Installment" },
+  { value: 2500, label: "$25 — Installment" },
   { value: 10000, label: "$100 — Full Payment" },
 ];
 
@@ -53,7 +53,7 @@ export default function AdminPaymentsScreen() {
 
   const [showModal, setShowModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
-  const [selectedAmount, setSelectedAmount] = useState<PaymentAmount>(5000);
+  const [selectedAmount, setSelectedAmount] = useState<PaymentAmount>(2500);
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>("cash_app");
   const [note, setNote] = useState("");
 
@@ -95,7 +95,7 @@ export default function AdminPaymentsScreen() {
 
   const resetForm = () => {
     setSelectedUserId(null);
-    setSelectedAmount(5000);
+    setSelectedAmount(2500);
     setSelectedMethod("cash_app");
     setNote("");
   };
@@ -454,7 +454,7 @@ export default function AdminPaymentsScreen() {
               <TextInput
                 value={note}
                 onChangeText={setNote}
-                placeholder="e.g., Installment 1 of 3"
+                placeholder="e.g., Installment 1 of 4"
                 placeholderTextColor={colors.muted}
                 style={[
                   styles.noteInput,
