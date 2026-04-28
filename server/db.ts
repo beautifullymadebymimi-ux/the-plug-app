@@ -253,6 +253,9 @@ export async function getSongById(id: number) {
 }
 
 export async function createSong(data: any) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
   const result = await db.execute(
     `INSERT INTO songs (title, createdBy) VALUES (?, ?)`,
     [data.title || "Untitled", 1]
