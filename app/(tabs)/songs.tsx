@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { FlatList, Text, View, Pressable, StyleSheet, TextInput, Modal, ScrollView, Platform } from "react-native";
+import { FlatList, Text, View, Pressable, StyleSheet, TextInput, Modal, ScrollView, Platform, Linking } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
@@ -98,6 +98,12 @@ export default function SongsScreen() {
     }
   };
 
+  const openSongUrl = async (url?: string | null) => {
+    if (!url) return;
+    const cleanUrl = url.startsWith("http") ? url : `https://${url}`;
+    await Linking.openURL(cleanUrl);
+  };
+
   const handleAddPress = () => {
     if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     if (segment === "songs") {
@@ -178,14 +184,20 @@ export default function SongsScreen() {
                     </View>
                   )}
                   {item.youtubeUrl && (
-                    <View style={[styles.keyBadge, { backgroundColor: "#FF000020" }]}>
+                    <Pressable
+                      onPress={() => openSongUrl(item.youtubeUrl)}
+                      style={[styles.keyBadge, { backgroundColor: "#FF000020" }]}
+                    >
                       <Text style={[styles.keyText, { color: "#FF0000" }]}>YT</Text>
-                    </View>
+                    </Pressable>
                   )}
                   {item.spotifyUrl && (
-                    <View style={[styles.keyBadge, { backgroundColor: "#1DB95420" }]}>
+                    <Pressable
+                      onPress={() => openSongUrl(item.spotifyUrl)}
+                      style={[styles.keyBadge, { backgroundColor: "#1DB95420" }]}
+                    >
                       <Text style={[styles.keyText, { color: "#1DB954" }]}>SP</Text>
-                    </View>
+                    </Pressable>
                   )}
                   {item.songKey && (
                     <View style={[styles.keyBadge, { backgroundColor: colors.primary + "20" }]}>
