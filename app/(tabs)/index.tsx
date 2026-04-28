@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
   },
   eventCard: {
     width: 214,
-    minHeight: 150,
+    minHeight: 100,
     padding: 16,
     borderRadius: 22,
     borderWidth: 1,

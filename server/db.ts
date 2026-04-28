@@ -525,8 +525,8 @@ export async function getAllUserPaymentSummaries() {
       name: u.name,
       email: u.email,
       totalPaid,
-      remaining: Math.max(15000 - totalPaid, 0), // $150 = 15000 cents
-      isPaidInFull: totalPaid >= 15000,
+      remaining: Math.max(10000 - totalPaid, 0), // $100 = 10000 cents
+      isPaidInFull: totalPaid >= 10000,
       paymentCount: userPayments.length,
     };
   });

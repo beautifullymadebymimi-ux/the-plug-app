@@ -17,7 +17,7 @@ import { trpc } from "@/lib/trpc";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import * as Haptics from "expo-haptics";
 
-const TOTAL_FEE_CENTS = 15000;
+const TOTAL_FEE_CENTS = 10000;
 
 function formatCents(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
@@ -275,7 +275,7 @@ export default function PortalScreen() {
 
         <View style={styles.installmentGrid}>
           <View style={[styles.installmentCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
-            <Text style={[styles.installmentAmount, { color: colors.foreground }]}>$150</Text>
+            <Text style={[styles.installmentAmount, { color: colors.foreground }]}>$100</Text>
             <Text style={[styles.installmentLabel, { color: colors.muted }]}>Pay in Full</Text>
           </View>
 
@@ -658,7 +658,7 @@ const styles = StyleSheet.create({
   },
   adminCard: {
     flex: 1,
-    minHeight: 150,
+    minHeight: 100,
     borderWidth: 1,
     borderRadius: 24,
     padding: 15,

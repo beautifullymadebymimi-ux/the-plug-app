@@ -20,7 +20,7 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import * as Haptics from "expo-haptics";
 import { useState } from "react";
 
-const TOTAL_FEE_CENTS = 15000;
+const TOTAL_FEE_CENTS = 10000;
 
 function formatCents(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
@@ -31,12 +31,12 @@ function formatDate(dateStr: string | Date): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-type PaymentAmount = 5000 | 15000;
+type PaymentAmount = 5000 | 10000;
 type PaymentMethod = "cash_app" | "zelle" | "cash" | "other";
 
 const AMOUNT_OPTIONS: { value: PaymentAmount; label: string }[] = [
   { value: 5000, label: "$50 — Installment" },
-  { value: 15000, label: "$150 — Full Payment" },
+  { value: 10000, label: "$100 — Full Payment" },
 ];
 
 const METHOD_OPTIONS: { value: PaymentMethod; label: string }[] = [

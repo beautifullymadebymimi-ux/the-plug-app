@@ -521,9 +521,9 @@ if (profileImageBase64) {
       const total = await db.getTotalPaidByUser(ctx.user.id);
       return {
         totalPaid: total,
-        totalDue: 15000,
-        remaining: Math.max(15000 - total, 0),
-        isPaidInFull: total >= 15000,
+        totalDue: 10000,
+        remaining: Math.max(10000 - total, 0),
+        isPaidInFull: total >= 10000,
       };
     }),
     allSummaries: adminProcedure.query(async () => {
