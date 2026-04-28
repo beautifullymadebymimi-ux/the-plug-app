@@ -270,6 +270,14 @@ export default function AdminPaymentsScreen() {
     </View>
   );
 
+  const handleResetLogin = () => {
+    if (Platform.OS === "web") {
+      window.localStorage.removeItem("app_session_token");
+      window.localStorage.removeItem("user_info");
+    }
+    router.replace("/auth");
+  };
+
   const ListHeader = () => (
     <View style={styles.headerContainer}>
       {/* Top Nav */}
@@ -281,6 +289,24 @@ export default function AdminPaymentsScreen() {
           <IconSymbol name="arrow.left" size={24} color={colors.foreground} />
         </Pressable>
         <Text style={[styles.pageTitle, { color: colors.foreground }]}>Payment Management</Text>
+
+        <Pressable
+          onPress={handleResetLogin}
+          style={({ pressed }) => [
+            {
+              paddingHorizontal: 10,
+              paddingVertical: 6,
+              borderRadius: 8,
+              borderWidth: 1,
+              borderColor: colors.border,
+              backgroundColor: colors.surface,
+            },
+            pressed && { opacity: 0.75 },
+          ]}
+        >
+          <Text style={{ color: colors.foreground, fontSize: 12, fontWeight: "700" }}>Reset Login</Text>
+        </Pressable>
+
         <Pressable
           onPress={() => openRecordModal()}
           style={({ pressed }) => [pressed && { opacity: 0.7 }]}
