@@ -66,14 +66,15 @@ export default function SetlistDetailScreen() {
       <Pressable
         onPress={() => router.push(`/songs?pickForSetlist=${id}` as any)}
         style={{
-          marginHorizontal:20,
-          marginBottom:14,
-          backgroundColor:colors.primary,
-          paddingVertical:14,
-          borderRadius:14,
-          alignItems:"center"
-        }}>
-        <Text style={{color:"white",fontWeight":"800"}}>+ Add Song</Text>
+          marginHorizontal: 20,
+          marginBottom: 14,
+          backgroundColor: colors.primary,
+          paddingVertical: 14,
+          borderRadius: 14,
+          alignItems: "center",
+        }}
+      >
+        <Text style={{ color: "white", fontWeight: "800" }}>+ Add Song</Text>
       </Pressable>
 
       <FlatList
