@@ -184,6 +184,7 @@ export default function AdminPaymentsScreen() {
   const summaries = summariesQuery.data || [];
   const allPayments = allPaymentsQuery.data || [];
   const isLoading = summariesQuery.isLoading;
+  const queryError = summariesQuery.error || allPaymentsQuery.error;
 
   // Stats
   const totalMembers = summaries.length;
@@ -353,7 +354,14 @@ export default function AdminPaymentsScreen() {
 
   return (
     <ScreenContainer edges={["top", "bottom", "left", "right"]}>
-      {isLoading ? (
+      {queryError ? (
+        <View style={styles.centered}>
+          <Text style={[styles.accessDeniedText, { color: colors.foreground }]}>Could not load members</Text>
+          <Text style={[styles.accessDeniedSub, { color: colors.muted }]}>
+            {queryError.message}
+          </Text>
+        </View>
+      ) : isLoading ? (
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={colors.primary} />
         </View>
