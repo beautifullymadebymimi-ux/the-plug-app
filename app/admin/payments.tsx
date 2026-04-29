@@ -289,7 +289,12 @@ export default function AdminPaymentsScreen() {
         >
           <IconSymbol name="arrow.left" size={24} color={colors.foreground} />
         </Pressable>
-        <Text style={[styles.pageTitle, { color: colors.foreground }]}>Payment Management</Text>
+        <View>
+          <Text style={[styles.pageTitle, { color: colors.foreground }]}>Payment Management</Text>
+          <Text style={{ color: colors.muted, fontSize: 11 }}>
+            Logged in as: {(user as any)?.email || "unknown"} / {(user as any)?.role || "no role"}
+          </Text>
+        </View>
 
         <Pressable
           onPress={handleResetLogin}
