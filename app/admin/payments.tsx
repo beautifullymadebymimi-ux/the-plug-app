@@ -58,10 +58,16 @@ export default function AdminPaymentsScreen() {
   const [note, setNote] = useState("");
 
   const summariesQuery = trpc.payments.allSummaries.useQuery(undefined, {
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+    retry: 2,
     enabled: isAuthenticated && (user as any)?.role === "admin",
   });
 
   const allPaymentsQuery = trpc.payments.allPayments.useQuery(undefined, {
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
+    retry: 2,
     enabled: isAuthenticated && (user as any)?.role === "admin",
   });
 
