@@ -10,6 +10,7 @@ import {
   Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { useAuth } from "@/hooks/use-auth";
@@ -38,6 +39,10 @@ export default function PortalScreen() {
   });
 
   const paymentsQuery = trpc.payments.myPayments.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const notificationsQuery = trpc.notifications.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
 
@@ -226,6 +231,8 @@ const renderPaymentItem = ({ item, index }: { item: any; index: number }) => (
         </View>
 
         <LogoutButton />
+
+<NotificationPanel />
 
 {isLoading ? (
           <ActivityIndicator size="small" color={colors.primary} style={{ marginVertical: 22 }} />
