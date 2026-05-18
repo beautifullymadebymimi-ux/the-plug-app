@@ -117,3 +117,19 @@ export async function scheduleEventReminder(eventTitle: string, eventDate: Date)
     },
   });
 }
+
+
+/**
+ * Send a local notification for a new song
+ */
+export async function notifyNewSong(title: string, artist?: string) {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "🎵 New Song Added",
+      body: artist
+        ? `${title} by ${artist} was added`
+        : `${title} was added`,
+    },
+    trigger: null,
+  });
+}

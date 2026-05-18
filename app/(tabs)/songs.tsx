@@ -6,6 +6,7 @@ import { useColors } from "@/hooks/use-colors";
 import { trpc } from "@/lib/trpc";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import * as Haptics from "expo-haptics";
+import { notifyNewSong } from "@/lib/notifications";
 
 export default function SongsScreen() {
   const colors = useColors();
@@ -98,6 +99,7 @@ export default function SongsScreen() {
       setShowCreateSetlist(false);
       resetSetlistForm();
       if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      notifyNewSong(variables.title, variables.artist);
     } catch {
       // Error handled by mutation
     }
