@@ -20,7 +20,6 @@ import { trpc } from "@/lib/trpc";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
-import { notifyNewEvent, scheduleEventReminder } from "@/lib/notifications";
 
 
 const eventTypeColors: Record<string, string> = {
@@ -121,8 +120,6 @@ useFocusEffect(
       setShowCreate(false);
       resetForm();
       setIsCreating(false);
-      notifyNewEvent(variables.title, variables.date, variables.location);
-      scheduleEventReminder(variables.title, new Date(variables.date));
     },
     onError: () => {
       setIsCreating(false);
