@@ -27,6 +27,20 @@ export const unstable_settings = {
   anchor: "(tabs)",
 };
 
+function PushTokenRegistrar() {
+  const savePushToken = trpc.push.savePushToken.useMutation();
+
+  useEffect(() => {
+    registerForNotifications().then((token) => {
+      if (token) {
+        savePushToken.mutate({ token });
+      }
+    });
+  }, []);
+
+  return null;
+}
+
 export default function RootLayout() {
   const initialInsets = initialWindowMetrics?.insets ?? DEFAULT_WEB_INSETS;
   const initialFrame = initialWindowMetrics?.frame ?? DEFAULT_WEB_FRAME;
@@ -36,11 +50,6 @@ export default function RootLayout() {
 
   useEffect(() => {
     initManusRuntime();
-    registerForNotifications().then((token) => {
-      if (token) {
-        savePushToken.mutate({ token });
-      }
-    });
   }, []);
 
   const handleSafeAreaUpdate = useCallback((metrics: Metrics) => {
@@ -67,7 +76,6 @@ export default function RootLayout() {
   );
   const [trpcClient] = useState(() => createTRPCClient());
 
-  const savePushToken = trpc.push.savePushToken.useMutation();
 
   const providerInitialMetrics = useMemo(() => {
     const metrics = initialWindowMetrics ?? { insets: initialInsets, frame: initialFrame };
@@ -85,6 +93,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
+          <PushTokenRegistrar />
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="event/[id]" />
