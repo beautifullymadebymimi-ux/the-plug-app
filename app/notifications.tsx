@@ -1,3 +1,7 @@
+export const unstable_settings = {
+  initialRouteName: "notifications",
+};
+
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
@@ -5,7 +9,19 @@ import { useColors } from "@/hooks/use-colors";
 
 export default function NotificationsScreen() {
   const colors = useColors();
-  const notificationsQuery = trpc.notifications.list.useQuery();
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    setReady(true);
+  }, []);
+
+  const notificationsQuery = trpc.notifications.list.useQuery(undefined, {
+    enabled: ready,
+  });
+
+  if (!ready) {
+    return null;
+  }
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
