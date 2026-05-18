@@ -36,7 +36,11 @@ export default function RootLayout() {
 
   useEffect(() => {
     initManusRuntime();
-    registerForNotifications();
+    registerForNotifications().then((token) => {
+      if (token) {
+        savePushToken.mutate({ token });
+      }
+    });
   }, []);
 
   const handleSafeAreaUpdate = useCallback((metrics: Metrics) => {
@@ -62,6 +66,8 @@ export default function RootLayout() {
       }),
   );
   const [trpcClient] = useState(() => createTRPCClient());
+
+  const savePushToken = trpc.push.savePushToken.useMutation();
 
   const providerInitialMetrics = useMemo(() => {
     const metrics = initialWindowMetrics ?? { insets: initialInsets, frame: initialFrame };

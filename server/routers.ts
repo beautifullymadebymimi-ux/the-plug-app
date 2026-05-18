@@ -513,6 +513,22 @@ if (profileImageBase64) {
       }),
   }),
 
+
+
+  push: router({
+    savePushToken: protectedProcedure
+      .input(z.object({
+        token: z.string(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        await db.updateUser(ctx.user.id, {
+          expoPushToken: input.token,
+        });
+
+        return { success: true };
+      }),
+  }),
+
   payments: router({
     myPayments: protectedProcedure.query(async ({ ctx }) => {
       return db.getPaymentsForUser(ctx.user.id);

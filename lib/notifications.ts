@@ -15,8 +15,8 @@ Notifications.setNotificationHandler({
 /**
  * Request notification permissions and set up Android channel
  */
-export async function registerForNotifications(): Promise<boolean> {
-  if (Platform.OS === "web") return false;
+export async function registerForNotifications(): Promise<string | null> {
+  if (Platform.OS === "web") return null;
 
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("default", {
@@ -34,7 +34,12 @@ export async function registerForNotifications(): Promise<boolean> {
     finalStatus = status;
   }
 
-  return finalStatus === "granted";
+  if (finalStatus !== "granted") {
+    return null;
+  }
+
+  const token = (await Notifications.getExpoPushTokenAsync()).data;
+  return token;
 }
 
 /**
