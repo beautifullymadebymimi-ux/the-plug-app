@@ -617,26 +617,3 @@ export async function createNotification(data: {
 
   return result[0].insertId;
 }
-
-
-export async function syncUsersToMemberProfiles() {
-  const db = await getDb();
-  if (!db) throw new Error("Database not available");
-
-  const allUsers = await db.select().from(users);
-  const allProfiles = await db.select().from(memberProfiles);
-
-  for (const user of allUsers) {
-    const exists = allProfiles.find(p => p.userId === user.id);
-
-    if (!exists) {
-      await db.insert(memberProfiles).values({
-        userId: user.id,
-        name: user.name || user.email || "Unknown User",
-        role: user.role || "member",
-      });
-    }
-  }
-
-  return { success: true };
-}

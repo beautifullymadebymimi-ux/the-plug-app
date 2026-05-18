@@ -161,10 +161,6 @@ if (profileImageBase64) {
 }
         return db.updateMemberProfile(id, updateData);
       }),
-    syncProfiles: adminProcedure.mutation(async () => {
-        return db.syncUsersToMemberProfiles();
-      }),
-
     delete: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
@@ -231,10 +227,6 @@ if (profileImageBase64) {
         if (data.endDate) updateData.endDate = new Date(data.endDate);
         return db.updateEvent(id, updateData as any);
       }),
-    syncProfiles: adminProcedure.mutation(async () => {
-        return db.syncUsersToMemberProfiles();
-      }),
-
     delete: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ input }) => db.deleteEvent(input.id)),
@@ -313,10 +305,6 @@ if (profileImageBase64) {
         await db.updateSong(input.songId, { audioUrl: url });
         return { audioUrl: url };
       }),
-    syncProfiles: adminProcedure.mutation(async () => {
-        return db.syncUsersToMemberProfiles();
-      }),
-
     delete: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ input }) => db.deleteSong(input.id)),
@@ -380,10 +368,6 @@ if (profileImageBase64) {
         });
         return { id: mediaId, url };
       }),
-    syncProfiles: adminProcedure.mutation(async () => {
-        return db.syncUsersToMemberProfiles();
-      }),
-
     delete: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ input }) => db.deleteMedia(input.id)),
@@ -423,10 +407,6 @@ if (profileImageBase64) {
         if (data.date) updateData.date = new Date(data.date);
         return db.updateDevotional(id, updateData as any);
       }),
-    syncProfiles: adminProcedure.mutation(async () => {
-        return db.syncUsersToMemberProfiles();
-      }),
-
     delete: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ input }) => db.deleteDevotional(input.id)),
@@ -461,10 +441,6 @@ if (profileImageBase64) {
     like: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ input }) => db.likeSuggestion(input.id)),
-    syncProfiles: adminProcedure.mutation(async () => {
-        return db.syncUsersToMemberProfiles();
-      }),
-
     delete: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ input }) => db.deleteSuggestion(input.id)),
