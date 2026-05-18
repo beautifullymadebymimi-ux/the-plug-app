@@ -1,10 +1,16 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useEffect, useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { useColors } from "@/hooks/use-colors";
 
 export default function NotificationsScreen() {
   const colors = useColors();
   const notificationsQuery = trpc.notifications.list.useQuery();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const notifications = notificationsQuery.data || [];
 
@@ -37,7 +43,7 @@ export default function NotificationsScreen() {
           </Text>
 
           <Text style={[styles.cardDate, { color: colors.primary }]}>
-            {new Date(item.createdAt).toLocaleString()}
+            {mounted ? new Date(item.createdAt).toLocaleString() : ""}
           </Text>
         </View>
       ))}
