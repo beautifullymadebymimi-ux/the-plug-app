@@ -191,7 +191,7 @@ if (profileImageBase64) {
       .mutation(async ({ input }) => {
   let imageUrl: string | undefined = undefined;
 
-  return db.createEvent({
+  const eventId = await db.createEvent({
     title: input.title,
     description: input.description,
     date: new Date(input.date),
@@ -201,6 +201,14 @@ if (profileImageBase64) {
     imageUrl,
     createdBy: 0,
   });
+
+  await db.createNotification({
+    title: "📅 New Event Added",
+    message: input.title,
+    type: "event",
+  });
+
+  return eventId;
 }),
     update: publicProcedure
       .input(z.object({
@@ -254,7 +262,17 @@ if (profileImageBase64) {
         spotifyUrl: z.string().optional(),
         audioUrl: z.string().optional(),
       }))
-      .mutation(({ input }) => db.createSong({ ...input, createdBy: 0 })),
+      .mutation(async ({ input }) => {
+        const songId = await db.createSong({ ...input, createdBy: 1 });
+
+        await db.createNotification({
+          title: "🎵 New Song Added",
+          message: input.artist ? `${input.title} by ${input.artist}` : input.title,
+          type: "song",
+        });
+
+        return songId;
+      }),
     update: publicProcedure
       .input(z.object({
         id: z.number(),
@@ -527,6 +545,10 @@ if (profileImageBase64) {
 
         return { success: true };
       }),
+  }),
+
+  notifications: router({
+    list: protectedProcedure.query(() => db.getNotifications()),
   }),
 
   payments: router({

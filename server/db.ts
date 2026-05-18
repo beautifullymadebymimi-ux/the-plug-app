@@ -5,6 +5,7 @@ import {
   events, InsertEvent,
   eventRsvps, InsertEventRsvp,
   songs, InsertSong,
+  notifications,
   setlists, InsertSetlist,
   setlistSongs, InsertSetlistSong,
   media, InsertMedia,
@@ -591,4 +592,28 @@ export async function deleteMemberProfile(id: number) {
   if (!dbConn) throw new Error("Database not available");
 
   await dbConn.delete(memberProfiles).where(eq(memberProfiles.id, id));
+}
+
+
+export async function getNotifications(limit = 50) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(notifications).orderBy(desc(notifications.createdAt)).limit(limit);
+}
+
+export async function createNotification(data: {
+  title: string;
+  message: string;
+  type?: string | null;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(notifications).values({
+    title: data.title,
+    message: data.message,
+    type: data.type || null,
+  });
+
+  return result[0].insertId;
 }

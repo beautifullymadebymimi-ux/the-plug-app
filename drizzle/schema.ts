@@ -188,3 +188,15 @@ export const users = mysqlTable("users", {
 	unique("users_email_unique").on(table.email),
 	unique("users_openId_unique").on(table.openId),
 ]);
+
+export const notifications = mysqlTable("notifications", {
+	id: int().autoincrement().notNull(),
+	title: varchar({ length: 255 }).notNull(),
+	message: text().notNull(),
+	type: varchar({ length: 50 }),
+	createdAt: timestamp({ mode: 'string' }).default(sql`(now())`).notNull(),
+},
+(table) => [
+	primaryKey({ columns: [table.id], name: "notifications_id"}),
+]);
+
