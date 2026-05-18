@@ -88,6 +88,7 @@ export const memberProfiles = mysqlTable("member_profiles", {
 	phone: varchar({ length: 32 }),
 	bio: text(),
 	avatarUrl: text(),
+	expoPushToken: text(),
 	createdAt: timestamp({ mode: 'string' }).default(sql`(now())`).notNull(),
 	updatedAt: timestamp({ mode: 'string' }).default(sql`(now())`).onUpdateNow().notNull(),
 	name: varchar({ length: 255 }).notNull(),
