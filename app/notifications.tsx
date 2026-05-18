@@ -1,9 +1,9 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { trpc } from "@/lib/trpc";
-import { useTheme } from "@/lib/theme-provider";
+import { useColors } from "@/hooks/use-colors";
 
 export default function NotificationsScreen() {
-  const { colors } = useTheme();
+  const colors = useColors();
   const notificationsQuery = trpc.notifications.list.useQuery();
 
   const notifications = notificationsQuery.data || [];
