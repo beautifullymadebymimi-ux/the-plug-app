@@ -18,6 +18,10 @@ export default function SetlistDetailScreen() {
     onSuccess: () => utils.setlists.songs.invalidate(),
   });
 
+  const toggleCompletedMutation = trpc.setlists.toggleCompleted.useMutation({
+    onSuccess: () => utils.setlists.songs.invalidate(),
+  });
+
   const removeSong = (rowId:number) => {
     Alert.alert("Remove Song","Remove this song from setlist?",[
       { text:"Cancel", style:"cancel" },
@@ -91,11 +95,43 @@ export default function SetlistDetailScreen() {
         renderItem={({ item, index }) => (
           <Pressable
             onPress={() => item.songId && router.push(`/song/${item.songId}` as any)}
-            style={({ pressed }) => [styles.songRow, { backgroundColor: colors.surface, borderColor: colors.border }, pressed && { opacity: 0.7 }]}
+            style={({ pressed }) => [
+              styles.songRow,
+              {
+                backgroundColor: item.completed ? colors.primary + "10" : colors.surface,
+                borderColor: item.completed ? colors.primary : colors.border,
+                opacity: item.completed ? 0.65 : 1,
+              },
+              pressed && { opacity: 0.7 },
+            ]}
           >
             <View style={[styles.orderBadge, { backgroundColor: colors.primary + "20" }]}>
               <Text style={[styles.orderText, { color: colors.primary }]}>{index + 1}</Text>
             </View>
+            <Pressable
+              onPress={(event) => {
+                event.stopPropagation();
+                toggleCompletedMutation.mutate({
+                  id: item.id,
+                  completed: !item.completed,
+                });
+              }}
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: 15,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: item.completed ? colors.primary : colors.background,
+                borderWidth: 1,
+                borderColor: item.completed ? colors.primary : colors.border,
+              }}
+            >
+              <Text style={{ color: item.completed ? "#fff" : colors.muted, fontWeight: "900" }}>
+                {item.completed ? "✓" : ""}
+              </Text>
+            </Pressable>
+
             <View style={styles.songInfo}>
               <Text style={[styles.songTitle, { color: colors.foreground }]} numberOfLines={1}>
                 {item.song?.title || "Unknown Song"}
