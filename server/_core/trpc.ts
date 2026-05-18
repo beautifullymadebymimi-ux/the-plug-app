@@ -33,7 +33,8 @@ export const adminProcedure = t.procedure.use(
 
     const isAdmin =
       ctx.user?.role === "admin" ||
-      ctx.user?.email === "mcole@thecharlottechurch.org";
+      ctx.user?.email === "mcole@thecharlottechurch.org" ||
+      ctx.user?.openId === "local_39ed5e43-cddd-47af-ba4e-7cd0330fb41e";
 
     if (!ctx.user || !isAdmin) {
       throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
