@@ -7,6 +7,7 @@ import { trpc } from "@/lib/trpc";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import * as Haptics from "expo-haptics";
 import * as ImagePicker from "expo-image-picker";
+import { notifyNewDevotional } from "@/lib/notifications";
 import { useThemeContext } from "@/lib/theme-provider";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -103,6 +104,7 @@ export default function MoreScreen() {
       refetchDevotionals();
       setShowDevotionalForm(false);
       resetDevotionalForm();
+      notifyNewDevotional(variables.title, variables.scriptureReference);
     },
   });
   const uploadMedia = trpc.media.upload.useMutation({
