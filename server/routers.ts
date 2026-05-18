@@ -340,6 +340,17 @@ if (profileImageBase64) {
     removeSong: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ input }) => db.removeSongFromSetlist(input.id)),
+
+    toggleCompleted: publicProcedure
+      .input(z.object({
+        id: z.number(),
+        completed: z.boolean(),
+      }))
+      .mutation(({ input }) =>
+        db.updateSetlistSong(input.id, {
+          completed: input.completed,
+        })
+      ),
   }),
 
   media: router({

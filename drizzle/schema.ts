@@ -105,6 +105,7 @@ export const setlistSongs = mysqlTable("setlist_songs", {
 	setlistId: int().notNull(),
 	songId: int().notNull(),
 	orderIndex: int().default(0).notNull(),
+	completed: boolean().default(false),
 	notes: text(),
 },
 (table) => [

@@ -617,3 +617,17 @@ export async function createNotification(data: {
 
   return result[0].insertId;
 }
+
+
+export async function updateSetlistSong(
+  id: number,
+  data: Partial<{ completed: boolean; notes: string | null }>
+) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  await db
+    .update(setlistSongs)
+    .set(data)
+    .where(eq(setlistSongs.id, id));
+}
