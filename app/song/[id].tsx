@@ -14,6 +14,59 @@ const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
   "Cm", "C#m", "Dm", "D#m", "Em", "Fm", "F#m", "Gm", "G#m", "Am", "A#m", "Bm"];
 
 
+
+function parseSongAssignments(notes?: string | null) {
+  if (!notes) return [];
+
+  const roles = [
+    "Lead Vocal",
+    "Harmony",
+    "Soprano",
+    "Alto",
+    "Tenor",
+    "Choir",
+    "Keys",
+    "Piano",
+    "Organ",
+    "Drums",
+    "Bass",
+    "Guitar",
+    "MD",
+    "Worship Leader",
+  ];
+
+  return notes
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const match = line.match(/^(.+?)\s*[:\-]\s*(.+)$/);
+      if (!match) return null;
+
+      const role = match[1].trim();
+      const person = match[2].trim();
+      const isAssignment = roles.some((r) =>
+        role.toLowerCase().includes(r.toLowerCase())
+      );
+
+      return isAssignment ? { role, person } : null;
+    })
+    .filter(Boolean) as { role: string; person: string }[];
+}
+
+function getAssignmentEmoji(role: string) {
+  const r = role.toLowerCase();
+
+  if (r.includes("vocal") || r.includes("harmony") || r.includes("choir") || r.includes("soprano") || r.includes("alto") || r.includes("tenor")) return "🎤";
+  if (r.includes("keys") || r.includes("piano") || r.includes("organ")) return "🎹";
+  if (r.includes("drums")) return "🥁";
+  if (r.includes("bass")) return "🎸";
+  if (r.includes("guitar")) return "🎸";
+  if (r.includes("md") || r.includes("leader")) return "⭐";
+
+  return "🎶";
+}
+
 function parseLyricSections(lyrics: string) {
   const lines = lyrics.split("\n");
   const sections: { label: string; lines: string[] }[] = [];
@@ -451,6 +504,39 @@ export default function SongDetailScreen() {
           </Pressable>
         )}
 
+        {/* Song Assignments */}
+        {parseSongAssignments(song.notes).length > 0 && (
+          <View
+            style={[
+              styles.assignmentCard,
+              {
+                backgroundColor: "#F59E0B10",
+                borderColor: "#F59E0B45",
+              },
+            ]}
+          >
+            <Text style={[styles.assignmentTitle, { color: colors.foreground }]}>
+              🎤 Song Assignments
+            </Text>
+
+            {parseSongAssignments(song.notes).map((assignment, index) => (
+              <View key={index} style={styles.assignmentRow}>
+                <Text style={styles.assignmentEmoji}>
+                  {getAssignmentEmoji(assignment.role)}
+                </Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.assignmentRole, { color: colors.foreground }]}>
+                    {assignment.role}
+                  </Text>
+                  <Text style={[styles.assignmentPerson, { color: colors.muted }]}>
+                    {assignment.person}
+                  </Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+
         {/* Rehearsal Notes */}
         {song.notes ? (
           <View
@@ -692,6 +778,34 @@ const styles = StyleSheet.create({
   emptyLyrics: { alignItems: "center", gap: 8, paddingVertical: 16 },
   notesCard: { padding: 20, borderRadius: 16, borderWidth: 1, gap: 8 },
   notesText: { fontSize: 14, lineHeight: 20 },
+
+  assignmentCard: {
+    padding: 18,
+    borderRadius: 18,
+    borderWidth: 1,
+    gap: 12,
+  },
+  assignmentTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+  },
+  assignmentRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 6,
+  },
+  assignmentEmoji: {
+    fontSize: 22,
+  },
+  assignmentRole: {
+    fontSize: 14,
+    fontWeight: "800",
+  },
+  assignmentPerson: {
+    fontSize: 14,
+    marginTop: 2,
+  },
 
   rehearsalCard: {
     padding: 18,
