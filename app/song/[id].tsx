@@ -255,7 +255,7 @@ export default function SongDetailScreen() {
       setEditTempo(song.tempo ? String(song.tempo) : "");
       setEditYoutubeUrl(song.youtubeUrl || "");
       setEditSpotifyUrl(song.spotifyUrl || "");
-      setEditAppleMusicUrl(song.spotifyUrl || "");
+      setEditAppleMusicUrl((song as any).appleMusicUrl || "");
     }
   }, [song, showEdit]);
 
@@ -274,7 +274,7 @@ export default function SongDetailScreen() {
       tempo: editTempo ? Number(editTempo) : undefined,
       youtubeUrl: editYoutubeUrl.trim() || undefined,
       spotifyUrl: editSpotifyUrl.trim() || undefined,
-      // spotifyUrl: editAppleMusicUrl.trim() || undefined,
+      appleMusicUrl: editAppleMusicUrl.trim() || undefined,
     });
   };
 
