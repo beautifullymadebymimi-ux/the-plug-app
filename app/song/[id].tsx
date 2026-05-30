@@ -156,9 +156,13 @@ export default function SongDetailScreen() {
       if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert("Uploaded", "Audio file has been attached to this song.");
     },
-    onError: () => {
+    onError: (err) => {
+      console.error("Audio upload failed:", err);
       setUploading(false);
-      Alert.alert("Error", "Could not upload audio file. Please try again.");
+      Alert.alert(
+        "Audio Upload Failed",
+        err?.message || "Could not upload audio file. Please try again."
+      );
     },
   });
 
@@ -239,9 +243,13 @@ export default function SongDetailScreen() {
         fileName: asset.name || `audio_${Date.now()}.mp3`,
         mimeType: asset.mimeType || "audio/mpeg",
       });
-    } catch (err) {
+    } catch (err: any) {
+      console.error("Audio picker failed:", err);
       setUploading(false);
-      Alert.alert("Error", "Could not pick audio file.");
+      Alert.alert(
+        "Audio Picker Failed",
+        err?.message || "Could not pick audio file."
+      );
     }
   };
 
