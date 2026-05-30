@@ -21,7 +21,9 @@ function parseLyricSections(lyrics: string) {
 
   for (const line of lines) {
     const trimmed = line.trim();
-    const match = trimmed.match(/^\[(VERSE|CHORUS|BRIDGE|TAG|INTRO|OUTRO|VAMP|ENDING)(\s*\d*)?\]$/i);
+    const match = trimmed.match(
+      /^\[(VERSE|CHORUS|PRE CHORUS|BRIDGE|TAG|INTRO|OUTRO|VAMP|ENDING)([\s\-A-Z0-9&]*)?\]$/i
+    );
 
     if (match) {
       if (current.lines.length > 0 || current.label !== "LYRICS") {
@@ -41,11 +43,15 @@ function parseLyricSections(lyrics: string) {
 }
 
 function getSectionColor(label: string) {
-  if (label.includes("VERSE")) return "#3B82F6";
-  if (label.includes("CHORUS")) return "#22C55E";
-  if (label.includes("BRIDGE")) return "#F59E0B";
-  if (label.includes("TAG")) return "#EF4444";
-  if (label.includes("VAMP")) return "#A855F7";
+  const l = label.toUpperCase();
+
+  if (l.includes("VERSE")) return "#3B82F6";
+  if (l.includes("PRE CHORUS")) return "#8B5CF6";
+  if (l.includes("CHORUS")) return "#22C55E";
+  if (l.includes("BRIDGE")) return "#F59E0B";
+  if (l.includes("TAG")) return "#EF4444";
+  if (l.includes("VAMP")) return "#A855F7";
+
   return "#64748B";
 }
 
