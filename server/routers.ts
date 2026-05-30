@@ -233,14 +233,14 @@ if (profileImageBase64) {
     rsvps: publicProcedure
       .input(z.object({ eventId: z.number() }))
       .query(({ input }) => db.getEventRsvps(input.eventId)),
-    rsvp: publicProcedure
+    rsvp: protectedProcedure
       .input(z.object({
         eventId: z.number(),
         status: z.enum(["going", "maybe", "cant_make_it"]),
       }))
-      .mutation(({ input }) => db.upsertRsvp({
+      .mutation(({ input, ctx }) => db.upsertRsvp({
         eventId: input.eventId,
-        userId: 0,
+        userId: ctx.user.id,
         status: input.status,
       })),
   }),
