@@ -13,6 +13,42 @@ import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
   "Cm", "C#m", "Dm", "D#m", "Em", "Fm", "F#m", "Gm", "G#m", "Am", "A#m", "Bm"];
 
+
+function parseLyricSections(lyrics: string) {
+  const lines = lyrics.split("\n");
+  const sections: { label: string; lines: string[] }[] = [];
+  let current = { label: "LYRICS", lines: [] as string[] };
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const match = trimmed.match(/^\[(VERSE|CHORUS|BRIDGE|TAG|INTRO|OUTRO|VAMP|ENDING)(\s*\d*)?\]$/i);
+
+    if (match) {
+      if (current.lines.length > 0 || current.label !== "LYRICS") {
+        sections.push(current);
+      }
+      current = { label: trimmed.replace("[", "").replace("]", "").toUpperCase(), lines: [] };
+    } else {
+      current.lines.push(line);
+    }
+  }
+
+  if (current.lines.length > 0 || current.label !== "LYRICS") {
+    sections.push(current);
+  }
+
+  return sections;
+}
+
+function getSectionColor(label: string) {
+  if (label.includes("VERSE")) return "#3B82F6";
+  if (label.includes("CHORUS")) return "#22C55E";
+  if (label.includes("BRIDGE")) return "#F59E0B";
+  if (label.includes("TAG")) return "#EF4444";
+  if (label.includes("VAMP")) return "#A855F7";
+  return "#64748B";
+}
+
 export default function SongDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const colors = useColors();
@@ -318,7 +354,29 @@ export default function SongDetailScreen() {
             <View style={styles.sectionHeader}>
               <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Lyrics</Text>
             </View>
-            <Text style={[styles.lyricsText, { color: colors.foreground }]}>{song.lyrics}</Text>
+            {parseLyricSections(song.lyrics).map((section, index) => {
+              const sectionColor = getSectionColor(section.label);
+
+              return (
+                <View
+                  key={`${section.label}-${index}`}
+                  style={[
+                    styles.lyricSectionBlock,
+                    {
+                      borderColor: sectionColor + "55",
+                      backgroundColor: sectionColor + "10",
+                    },
+                  ]}
+                >
+                  <Text style={[styles.lyricSectionLabel, { color: sectionColor }]}>
+                    {section.label}
+                  </Text>
+                  <Text style={[styles.lyricsText, { color: colors.foreground }]}>
+                    {section.lines.join("\n").trim()}
+                  </Text>
+                </View>
+              );
+            })}
           </View>
         ) : (
           <Pressable
