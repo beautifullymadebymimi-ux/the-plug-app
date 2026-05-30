@@ -39,13 +39,20 @@ export default function SetlistDetailScreen() {
   return (
     <ScreenContainer edges={["top", "bottom", "left", "right"]}>
       <View style={styles.navBar}>
-        <Pressable onPress={() => router.back()} style={({ pressed }) => [styles.backButton, { backgroundColor: colors.surface }, pressed && { opacity: 0.7 }]}>
-          <IconSymbol name="arrow.left" size={20} color={colors.foreground} />
-        
-<Pressable onPress={() => removeSong(item.id)}>
-  <IconSymbol name="trash" size={18} color="#ff4d4f" />
-</Pressable>
-</Pressable>
+        <Pressable
+          onPress={() => router.back()}
+          style={({ pressed }) => [
+            styles.backButton,
+            { backgroundColor: colors.surface },
+            pressed && { opacity: 0.7 },
+          ]}
+        >
+          <IconSymbol
+            name="arrow.left"
+            size={20}
+            color={colors.foreground}
+          />
+        </Pressable>
 
         <Text style={[styles.navTitle, { color: colors.foreground }]}>Setlist</Text>
         <View style={{ width: 40 }} />
