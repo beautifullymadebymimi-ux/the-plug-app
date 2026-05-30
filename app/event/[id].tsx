@@ -6,6 +6,7 @@ import { useColors } from "@/hooks/use-colors";
 import { trpc } from "@/lib/trpc";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import * as Haptics from "expo-haptics";
+import { useAuth } from "@/hooks/use-auth";
 
 const eventTypeColors: Record<string, string> = {
   rehearsal: "#3B82F6",
@@ -20,6 +21,7 @@ export default function EventDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
 const colors = useColors();
 const router = useRouter();
+const { user } = useAuth();
 const utils = trpc.useUtils();
   const { data: event, refetch } = trpc.events.byId.useQuery({ id: Number(id) }, { enabled: !!id });
   const { data: rsvps, refetch: refetchRsvps } = trpc.events.rsvps.useQuery({ eventId: Number(id) }, { enabled: !!id });
@@ -120,6 +122,15 @@ const deleteMutation = trpc.events.delete.useMutation({
   }
 
   const typeColor = eventTypeColors[event.type] || eventTypeColors.other;
+  const myRsvp = rsvps?.find((r) => r.userId === user?.id);
+  const myRsvpLabel =
+    myRsvp?.status === "going"
+      ? "✅ Going"
+      : myRsvp?.status === "maybe"
+        ? "⏰ Maybe"
+        : myRsvp?.status === "cant_make_it"
+          ? "❌ Can't Make It"
+          : null;
 
   // ---- Edit Mode ----
   if (editing) {
@@ -292,6 +303,15 @@ const deleteMutation = trpc.events.delete.useMutation({
         {/* RSVP */}
         <View style={styles.rsvpSection}>
           <Text style={[styles.rsvpTitle, { color: colors.foreground }]}>Are you going?</Text>
+
+          {myRsvpLabel && (
+            <View style={[styles.myRsvpCard, { backgroundColor: colors.primary + "14", borderColor: colors.primary + "35" }]}>
+              <Text style={[styles.myRsvpText, { color: colors.primary }]}>
+                Your RSVP: {myRsvpLabel}
+              </Text>
+            </View>
+          )}
+
           <View style={styles.rsvpButtons}>
             {([
               { status: "going" as const, label: "Going", emoji: "checkmark.circle.fill" as const },
@@ -304,14 +324,25 @@ const deleteMutation = trpc.events.delete.useMutation({
                 style={({ pressed }) => [
                   styles.rsvpButton,
                   {
-                    backgroundColor: colors.surface,
-                    borderColor: colors.border,
+                    backgroundColor: myRsvp?.status === opt.status ? colors.primary + "18" : colors.surface,
+                    borderColor: myRsvp?.status === opt.status ? colors.primary : colors.border,
                   },
                   pressed && { opacity: 0.8, transform: [{ scale: 0.97 }] },
                 ]}
               >
-                <IconSymbol name={opt.emoji} size={20} color={colors.muted} />
-                <Text style={[styles.rsvpButtonText, { color: colors.foreground }]}>{opt.label}</Text>
+                <IconSymbol
+                  name={opt.emoji}
+                  size={20}
+                  color={myRsvp?.status === opt.status ? colors.primary : colors.muted}
+                />
+                <Text
+                  style={[
+                    styles.rsvpButtonText,
+                    { color: myRsvp?.status === opt.status ? colors.primary : colors.foreground },
+                  ]}
+                >
+                  {opt.label}{myRsvp?.status === opt.status ? " ✓" : ""}
+                </Text>
               </Pressable>
             ))}
           </View>
@@ -387,6 +418,8 @@ const styles = StyleSheet.create({
   rsvpButtons: { flexDirection: "row", gap: 10 },
   rsvpButton: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 14, borderRadius: 14, borderWidth: 1.5, gap: 6 },
   rsvpButtonText: { fontSize: 14, fontWeight: "700" },
+  myRsvpCard: { borderWidth: 1, borderRadius: 14, padding: 12 },
+  myRsvpText: { fontSize: 14, fontWeight: "800" },
   rsvpSummaryRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 12 },
   rsvpSummaryPill: { paddingHorizontal: 10, paddingVertical: 7, borderRadius: 999 },
   rsvpSummaryText: { fontSize: 12, fontWeight: "800" },
