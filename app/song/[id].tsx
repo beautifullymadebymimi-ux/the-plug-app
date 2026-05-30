@@ -451,11 +451,45 @@ export default function SongDetailScreen() {
           </Pressable>
         )}
 
-        {/* Notes / Arrangement */}
+        {/* Rehearsal Notes */}
         {song.notes ? (
-          <View style={[styles.notesCard, { backgroundColor: colors.primary + "10", borderColor: colors.primary + "30" }]}>
-            <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Arrangement Notes</Text>
-            <Text style={[styles.notesText, { color: colors.muted }]}>{song.notes}</Text>
+          <View
+            style={[
+              styles.rehearsalCard,
+              {
+                backgroundColor: "#7C3AED10",
+                borderColor: "#7C3AED40",
+              },
+            ]}
+          >
+            <View style={styles.rehearsalHeader}>
+              <Text style={styles.rehearsalEmoji}>🎤</Text>
+              <Text
+                style={[
+                  styles.rehearsalTitle,
+                  { color: colors.foreground },
+                ]}
+              >
+                Rehearsal Notes
+              </Text>
+            </View>
+
+            {song.notes
+              .split("\n")
+              .filter((line) => line.trim())
+              .map((line, index) => (
+                <View key={index} style={styles.rehearsalRow}>
+                  <Text style={styles.rehearsalBullet}>•</Text>
+                  <Text
+                    style={[
+                      styles.rehearsalText,
+                      { color: colors.foreground },
+                    ]}
+                  >
+                    {line}
+                  </Text>
+                </View>
+              ))}
           </View>
         ) : null}
       </ScrollView>
@@ -658,6 +692,41 @@ const styles = StyleSheet.create({
   emptyLyrics: { alignItems: "center", gap: 8, paddingVertical: 16 },
   notesCard: { padding: 20, borderRadius: 16, borderWidth: 1, gap: 8 },
   notesText: { fontSize: 14, lineHeight: 20 },
+
+  rehearsalCard: {
+    padding: 18,
+    borderRadius: 18,
+    borderWidth: 1,
+    gap: 12,
+  },
+  rehearsalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  rehearsalEmoji: {
+    fontSize: 20,
+  },
+  rehearsalTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+  },
+  rehearsalRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+  },
+  rehearsalBullet: {
+    fontSize: 18,
+    color: "#7C3AED",
+    fontWeight: "800",
+    marginTop: -1,
+  },
+  rehearsalText: {
+    flex: 1,
+    fontSize: 15,
+    lineHeight: 22,
+  },
   youtubeCard: { flexDirection: "row", alignItems: "center", padding: 16, borderRadius: 16, backgroundColor: "#FF0000", gap: 14 },
   youtubeIcon: { width: 48, height: 48, borderRadius: 14, backgroundColor: "rgba(255,255,255,0.2)", justifyContent: "center", alignItems: "center" },
   youtubeContent: { flex: 1, gap: 2 },
