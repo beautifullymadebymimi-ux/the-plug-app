@@ -323,6 +323,27 @@ const deleteMutation = trpc.events.delete.useMutation({
             <Text style={[styles.attendeesTitle, { color: colors.foreground }]}>
               Responses ({rsvps.length})
             </Text>
+
+            <View style={styles.rsvpSummaryRow}>
+              <View style={[styles.rsvpSummaryPill, { backgroundColor: colors.success + "18" }]}>
+                <Text style={[styles.rsvpSummaryText, { color: colors.success }]}>
+                  ✅ Going: {rsvps.filter((r) => r.status === "going").length}
+                </Text>
+              </View>
+
+              <View style={[styles.rsvpSummaryPill, { backgroundColor: colors.warning + "18" }]}>
+                <Text style={[styles.rsvpSummaryText, { color: colors.warning }]}>
+                  ⏰ Maybe: {rsvps.filter((r) => r.status === "maybe").length}
+                </Text>
+              </View>
+
+              <View style={[styles.rsvpSummaryPill, { backgroundColor: colors.error + "18" }]}>
+                <Text style={[styles.rsvpSummaryText, { color: colors.error }]}>
+                  ❌ Can't: {rsvps.filter((r) => r.status === "cant_make_it").length}
+                </Text>
+              </View>
+            </View>
+
             {rsvps.map((r) => (
               <View key={r.id} style={[styles.attendeeRow, { borderBottomColor: colors.border }]}>
                 <Text style={[styles.attendeeName, { color: colors.foreground }]}>{r.user?.name || "Unknown"}</Text>
@@ -366,6 +387,9 @@ const styles = StyleSheet.create({
   rsvpButtons: { flexDirection: "row", gap: 10 },
   rsvpButton: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 14, borderRadius: 14, borderWidth: 1.5, gap: 6 },
   rsvpButtonText: { fontSize: 14, fontWeight: "700" },
+  rsvpSummaryRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 12 },
+  rsvpSummaryPill: { paddingHorizontal: 10, paddingVertical: 7, borderRadius: 999 },
+  rsvpSummaryText: { fontSize: 12, fontWeight: "800" },
   attendeesCard: { padding: 16, borderRadius: 16, borderWidth: 1, gap: 4 },
   attendeesTitle: { fontSize: 16, fontWeight: "700", marginBottom: 8 },
   attendeeRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 10, borderBottomWidth: 0.5 },
