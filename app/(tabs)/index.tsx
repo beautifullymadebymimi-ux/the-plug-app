@@ -164,7 +164,7 @@ export default function HomeScreen() {
 
           <View style={{ flex: 1 }}>
             <Text style={[styles.helpPromptTitle, { color: colors.foreground }]}>
-              New here? Learn how to use The Plug
+              Learn The Plug in 2 minutes
             </Text>
             <Text style={[styles.helpPromptText, { color: colors.muted }]}>
               Quick guide for chat, notifications, songs, setlists, profiles, and RSVP.
