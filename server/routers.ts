@@ -451,10 +451,32 @@ if (profileImageBase64) {
       .query(({ input }) => db.getChatMessages(input?.limit)),
     send: publicProcedure
       .input(z.object({ content: z.string().min(1), memberId: z.number() }))
-      .mutation(({ input }) => db.createChatMessage({
-        userId: input.memberId,
-        content: input.content,
-      })),
+      .mutation(async ({ input }) => {
+        const messageId = await db.createChatMessage({
+          userId: input.memberId,
+          content: input.content,
+        });
+
+        try {
+          const members = await db.getAllMemberProfiles();
+          const sender = members.find((member: any) => member.id === input.memberId);
+          const senderName = sender?.name || "Someone";
+          const preview =
+            input.content.length > 90
+              ? `${input.content.slice(0, 90)}...`
+              : input.content;
+
+          await db.createNotification({
+            title: "💬 New Chat Message",
+            message: `${senderName}: ${preview}`,
+            type: "chat",
+          });
+        } catch (error) {
+          console.error("[Chat Notification] Failed to create notification:", error);
+        }
+
+        return messageId;
+      }),
   }),
 
   suggestions: router({
