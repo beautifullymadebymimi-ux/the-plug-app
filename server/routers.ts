@@ -298,11 +298,34 @@ if (profileImageBase64) {
         mimeType: z.string(),
       }))
       .mutation(async ({ input }) => {
+        console.log("[Audio Upload] Starting upload", {
+          songId: input.songId,
+          fileName: input.fileName,
+          mimeType: input.mimeType,
+          base64Length: input.fileBase64.length,
+        });
+
         const buffer = Buffer.from(input.fileBase64, "base64");
+        console.log("[Audio Upload] Buffer created", {
+          sizeBytes: buffer.length,
+        });
+
         const randomSuffix = Math.random().toString(36).substring(2, 10);
-        const fileKey = `songs/audio/${input.songId}-${randomSuffix}-${input.fileName}`;
+        const safeFileName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
+        const fileKey = `songs/audio/${input.songId}-${randomSuffix}-${safeFileName}`;
+
+        console.log("[Audio Upload] Uploading to storage", { fileKey });
+
         const { url } = await storagePut(fileKey, buffer, input.mimeType);
+
+        console.log("[Audio Upload] Storage upload complete", { url });
+
         await db.updateSong(input.songId, { audioUrl: url });
+
+        console.log("[Audio Upload] Song audioUrl updated", {
+          songId: input.songId,
+        });
+
         return { audioUrl: url };
       }),
     delete: publicProcedure
