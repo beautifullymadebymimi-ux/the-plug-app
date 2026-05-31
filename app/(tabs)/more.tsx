@@ -13,7 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const CHAT_MEMBER_KEY = "the_plug_chat_member_id";
 
-type Section = "menu" | "media" | "devotionals" | "chat" | "about" | "drive" | "popl" | "suggestions";
+type Section = "menu" | "media" | "devotionals" | "chat" | "notifications" | "about" | "drive" | "popl" | "suggestions";
 
 const SUGGESTION_CATEGORIES = [
   { key: "song" as const, label: "Song", color: "#8B5CF6" },
@@ -98,6 +98,7 @@ export default function MoreScreen() {
   const { data: mediaList, refetch: refetchMedia } = trpc.media.list.useQuery(undefined, { enabled: section === "media" });
   const { data: devotionalsList, refetch: refetchDevotionals } = trpc.devotionals.list.useQuery(undefined, { enabled: section === "devotionals" });
   const { data: chatMessages, refetch: refetchChat } = trpc.chat.messages.useQuery(undefined, { enabled: section === "chat", refetchInterval: section === "chat" ? 3000 : false });
+  const { data: notificationsList } = trpc.notifications.list.useQuery(undefined, { enabled: section === "notifications" });
   const sendMessage = trpc.chat.send.useMutation({ onSuccess: () => { refetchChat(); setChatInput(""); } });
   const createDevotional = trpc.devotionals.create.useMutation({
     onSuccess: (_data, variables) => {
@@ -399,6 +400,53 @@ export default function MoreScreen() {
   }
 
   // ---- Chat Section ----
+  if (section === "notifications") {
+    return (
+      <ScreenContainer>
+        <View style={styles.subHeader}>
+          <Pressable onPress={() => setSection("menu")} style={({ pressed }) => [pressed && { opacity: 0.6 }]}>
+            <IconSymbol name="arrow.left" size={24} color={colors.foreground} />
+          </Pressable>
+          <Text style={[styles.subTitle, { color: colors.foreground }]}>Notifications</Text>
+          <View style={{ width: 28 }} />
+        </View>
+
+        <FlatList
+          data={notificationsList || []}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={[styles.emptyState, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <IconSymbol name="bell.fill" size={48} color={colors.muted} />
+              <Text style={[styles.emptyTitle, { color: colors.foreground }]}>No notifications yet</Text>
+              <Text style={[styles.emptySubtitle, { color: colors.muted }]}>Chat messages, songs, and updates will appear here.</Text>
+            </View>
+          }
+          renderItem={({ item }) => (
+            <View style={[styles.notificationCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <View style={[styles.notificationIcon, { backgroundColor: colors.primary + "18" }]}>
+                <IconSymbol
+                  name={item.type === "chat" ? "bubble.left.fill" : item.type === "song" ? "music.note" : "bell.fill"}
+                  size={18}
+                  color={colors.primary}
+                />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.notificationTitle, { color: colors.foreground }]}>
+                  {item.title}
+                </Text>
+                <Text style={[styles.notificationMessage, { color: colors.muted }]}>
+                  {item.message}
+                </Text>
+              </View>
+            </View>
+          )}
+        />
+      </ScreenContainer>
+    );
+  }
+
   if (section === "chat") {
     return (
       <ScreenContainer>
@@ -1033,6 +1081,7 @@ export default function MoreScreen() {
   const menuItems = [
     { key: "media" as Section, icon: "photo.fill" as const, label: "Media", desc: "Photos & videos" },
     { key: "devotionals" as Section, icon: "book.fill" as const, label: "Devotionals", desc: "Daily scripture & reflections" },
+    { key: "notifications" as Section, icon: "bell.fill" as const, label: "Notifications", desc: "See recent app updates" },
     { key: "chat" as Section, icon: "bubble.left.fill" as const, label: "Group Chat", desc: "Chat with the group" },
     { key: "suggestions" as Section, icon: "paintbrush.fill" as const, label: "Suggestion Board", desc: "Song ideas, venues & more" },
     { key: "drive" as Section, icon: "folder.fill" as const, label: "Google Drive", desc: "Music files & lyrics" },
@@ -1100,6 +1149,10 @@ const styles = StyleSheet.create({
   uploadBanner: { flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 10, gap: 8, marginHorizontal: 20, borderRadius: 12, marginBottom: 8 },
   uploadText: { fontSize: 14, fontWeight: "600" },
   // Chat styles
+  notificationCard: { flexDirection: "row", alignItems: "flex-start", gap: 12, padding: 16, borderRadius: 16, borderWidth: 1, marginBottom: 10 },
+  notificationIcon: { width: 36, height: 36, borderRadius: 18, justifyContent: "center", alignItems: "center" },
+  notificationTitle: { fontSize: 15, fontWeight: "800", marginBottom: 4 },
+  notificationMessage: { fontSize: 14, lineHeight: 19 },
   chatContent: { paddingHorizontal: 16, paddingBottom: 16, gap: 8, flexGrow: 1 },
   chatEmpty: { flex: 1, justifyContent: "center", alignItems: "center", paddingTop: 100 },
   chatEmptyText: { fontSize: 15 },
