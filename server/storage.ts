@@ -63,6 +63,8 @@ function createR2Client(config: StorageConfig) {
   return new S3Client({
     region: "auto",
     endpoint: `https://${config.accountId}.r2.cloudflarestorage.com`,
+    forcePathStyle: true,
+    maxAttempts: 1,
     credentials: {
       accessKeyId: config.accessKeyId,
       secretAccessKey: config.secretAccessKey,
@@ -80,18 +82,34 @@ export async function storagePut(
 
   const key = appendHashSuffix(normalizeKey(relKey));
 
-  await client.send(
-    new PutObjectCommand({
-      Bucket: config.bucket,
-      Key: key,
-      Body: data,
-      ContentType: contentType,
-    }),
-  );
+  console.log("[R2] Upload starting", {
+    bucket: config.bucket,
+    key,
+    contentType,
+    publicUrl: config.publicUrl,
+  });
+
+  try {
+    await client.send(
+      new PutObjectCommand({
+        Bucket: config.bucket,
+        Key: key,
+        Body: data,
+        ContentType: contentType,
+      }),
+    );
+  } catch (error) {
+    console.error("[R2] Upload failed", error);
+    throw error;
+  }
+
+  const url = `${config.publicUrl}/${encodeKeyForUrl(key)}`;
+
+  console.log("[R2] Upload finished", { key, url });
 
   return {
     key,
-    url: `${config.publicUrl}/${encodeKeyForUrl(key)}`,
+    url,
   };
 }
 
