@@ -36,6 +36,9 @@ export default function SongsScreen() {
 
   const { data: songsList, refetch: refetchSongs } = trpc.songs.list.useQuery();
   const { data: setlistsList, refetch: refetchSetlists } = trpc.setlists.list.useQuery();
+  const { data: setlistReadiness } = trpc.setlists.readiness.useQuery(undefined, {
+    enabled: segment === "setlists",
+  });
   const createSong = trpc.songs.create.useMutation({ onSuccess: () => { refetchSongs(); setShowCreateSong(false); resetSongForm(); } });
   const createSetlist = trpc.setlists.create.useMutation();
   const addSongToSetlist = trpc.setlists.addSong.useMutation();
@@ -58,6 +61,14 @@ export default function SongsScreen() {
       (s.artist && s.artist.toLowerCase().includes(songSearch.toLowerCase()))
     );
   }, [songsList, songSearch]);
+
+  const readinessBySetlistId = useMemo(() => {
+    const map: Record<number, any> = {};
+    (setlistReadiness || []).forEach((summary: any) => {
+      map[summary.id] = summary;
+    });
+    return map;
+  }, [setlistReadiness]);
 
   const handleCreateSong = () => {
     if (!newTitle.trim()) return;
@@ -256,7 +267,11 @@ export default function SongsScreen() {
               <Text style={[styles.emptySubtitle, { color: colors.muted }]}>Create a setlist for your next event</Text>
             </View>
           }
-          renderItem={({ item }) => (
+          renderItem={({ item }) => {
+            const summary = readinessBySetlistId[item.id];
+            const songCount = summary?.songCount || 0;
+
+            return (
             <Pressable
               onPress={() => router.push(`/setlist/${item.id}` as any)}
               style={({ pressed }) => [styles.songCard, { backgroundColor: colors.surface, borderColor: colors.border }, pressed && { opacity: 0.7 }]}
@@ -267,10 +282,43 @@ export default function SongsScreen() {
               <View style={styles.songInfo}>
                 <Text style={[styles.songTitle, { color: colors.foreground }]} numberOfLines={1}>{item.title}</Text>
                 {item.date && <Text style={[styles.songArtist, { color: colors.muted }]}>{new Date(item.date).toLocaleDateString()}</Text>}
+
+                {summary && (
+                  <View style={styles.readinessRow}>
+                    <View style={[styles.readinessBadge, { backgroundColor: colors.primary + "18" }]}>
+                      <IconSymbol name="music.note" size={11} color={colors.primary} />
+                      <Text style={[styles.readinessText, { color: colors.primary }]}>
+                        {songCount} songs
+                      </Text>
+                    </View>
+
+                    <View style={[styles.readinessBadge, { backgroundColor: "#10B98120" }]}>
+                      <IconSymbol name="waveform" size={11} color="#10B981" />
+                      <Text style={[styles.readinessText, { color: "#10B981" }]}>
+                        {summary.audioCount}/{songCount} audio
+                      </Text>
+                    </View>
+
+                    <View style={[styles.readinessBadge, { backgroundColor: "#F59E0B20" }]}>
+                      <IconSymbol name="person.2.fill" size={11} color="#F59E0B" />
+                      <Text style={[styles.readinessText, { color: "#F59E0B" }]}>
+                        {summary.assignmentCount}/{songCount} assigned
+                      </Text>
+                    </View>
+
+                    <View style={[styles.readinessBadge, { backgroundColor: "#8B5CF620" }]}>
+                      <IconSymbol name="doc.text.fill" size={11} color="#8B5CF6" />
+                      <Text style={[styles.readinessText, { color: "#8B5CF6" }]}>
+                        {summary.notesCount}/{songCount} notes
+                      </Text>
+                    </View>
+                  </View>
+                )}
               </View>
               <IconSymbol name="chevron.right" size={18} color={colors.muted} />
             </Pressable>
-          )}
+            );
+          }}
         />
       )}
 

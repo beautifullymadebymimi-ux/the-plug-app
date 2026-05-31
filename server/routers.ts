@@ -367,6 +367,7 @@ export const appRouter = router({
     songs: publicProcedure
       .input(z.object({ setlistId: z.number() }))
       .query(({ input }) => db.getSetlistSongs(input.setlistId)),
+    readiness: publicProcedure.query(() => db.getSetlistReadinessSummaries()),
     addSong: publicProcedure
       .input(z.object({
         setlistId: z.number(),

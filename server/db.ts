@@ -330,6 +330,80 @@ export async function getSetlistSongs(setlistId: number) {
   }));
 }
 
+
+export async function getSetlistReadinessSummaries() {
+  const db = await getDb();
+  if (!db) return [];
+
+  const allSetlists = await db.select().from(setlists).orderBy(desc(setlists.date));
+  const allSetlistSongs = await db.select().from(setlistSongs);
+  const allSongs = await db.select().from(songs);
+
+  const assignmentRoles = [
+    "lead vocal",
+    "harmony",
+    "soprano",
+    "alto",
+    "tenor",
+    "choir",
+    "keys",
+    "piano",
+    "organ",
+    "drums",
+    "bass",
+    "guitar",
+    "md",
+    "worship leader",
+  ];
+
+  function hasAssignment(notes?: string | null) {
+    if (!notes) return false;
+
+    return notes
+      .split("\n")
+      .map((line) => line.trim().toLowerCase())
+      .some((line) => {
+        const hasSeparator = line.includes(":") || line.includes("-");
+        return hasSeparator && assignmentRoles.some((role) => line.includes(role));
+      });
+  }
+
+  return allSetlists.map((setlist) => {
+    const items = allSetlistSongs.filter((item) => item.setlistId === setlist.id);
+    const linkedSongs = items
+      .map((item) => ({
+        item,
+        song: allSongs.find((song) => song.id === item.songId),
+      }))
+      .filter((entry) => entry.song);
+
+    const songCount = linkedSongs.length;
+
+    const audioCount = linkedSongs.filter(({ song }) =>
+      Boolean((song as any)?.audioUrl || (song as any)?.audioUrl2)
+    ).length;
+
+    const assignmentCount = linkedSongs.filter(({ song }) =>
+      hasAssignment((song as any)?.notes)
+    ).length;
+
+    const notesCount = linkedSongs.filter(({ song, item }) =>
+      Boolean(((song as any)?.notes || item.notes || "").trim())
+    ).length;
+
+    return {
+      id: setlist.id,
+      title: setlist.title,
+      date: setlist.date,
+      songCount,
+      audioCount,
+      assignmentCount,
+      notesCount,
+    };
+  });
+}
+
+
 export async function addSongToSetlist(data: InsertSetlistSong) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
