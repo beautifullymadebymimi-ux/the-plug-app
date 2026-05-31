@@ -178,17 +178,23 @@ export default function SongDetailScreen() {
   };
 
   const handleRemoveAudio = () => {
+    const removeAudio = () => {
+      player.pause();
+      updateMutation.mutate({ id: Number(id), audioUrl: null });
+    };
+
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm("Remove the audio file from this song?");
+      if (confirmed) removeAudio();
+      return;
+    }
+
     Alert.alert(
       "Remove Audio",
       "Remove the audio file from this song?",
       [
         { text: "Cancel", style: "cancel" },
-        {
-          text: "Remove", style: "destructive", onPress: () => {
-            player.pause();
-            updateMutation.mutate({ id: Number(id), audioUrl: null });
-          }
-        },
+        { text: "Remove", style: "destructive", onPress: removeAudio },
       ]
     );
   };
@@ -372,6 +378,23 @@ export default function SongDetailScreen() {
                 </View>
               </View>
             </View>
+
+            <Pressable
+              onPress={handleRemoveAudio}
+              style={({ pressed }) => [
+                styles.removeAudioButton,
+                {
+                  backgroundColor: colors.error + "12",
+                  borderColor: colors.error + "35",
+                },
+                pressed && { opacity: 0.75 },
+              ]}
+            >
+              <IconSymbol name="trash" size={16} color={colors.error} />
+              <Text style={[styles.removeAudioText, { color: colors.error }]}>
+                Remove Audio
+              </Text>
+            </Pressable>
           </View>
         ) : (
           <Pressable
