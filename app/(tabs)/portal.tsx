@@ -315,9 +315,35 @@ const renderPaymentItem = ({ item, index }: { item: any; index: number }) => (
 
       {user && user.role === "admin" && (
         <View style={styles.adminSection}>
-          <View>
-            <Text style={[styles.sectionEyebrow, { color: colors.primary }]}>ADMIN</Text>
-            <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Admin Console</Text>
+          <View style={styles.adminHeaderRow}>
+            <View>
+              <Text style={[styles.sectionEyebrow, { color: colors.primary }]}>ADMIN</Text>
+              <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Admin Dashboard</Text>
+            </View>
+
+            <View style={[styles.adminStatusPill, { backgroundColor: colors.primary + "15" }]}>
+              <IconSymbol name="shield.fill" size={13} color={colors.primary} />
+              <Text style={[styles.adminStatusText, { color: colors.primary }]}>Admin</Text>
+            </View>
+          </View>
+
+          <View style={styles.adminStatsGrid}>
+            <View style={[styles.adminStatCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <Text style={[styles.adminStatLabel, { color: colors.muted }]}>Paid</Text>
+              <Text style={[styles.adminStatValue, { color: colors.success }]}>{formatCents(totalPaid)}</Text>
+            </View>
+
+            <View style={[styles.adminStatCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <Text style={[styles.adminStatLabel, { color: colors.muted }]}>Remaining</Text>
+              <Text style={[styles.adminStatValue, { color: remaining === 0 ? colors.success : colors.warning }]}>
+                {formatCents(remaining)}
+              </Text>
+            </View>
+
+            <View style={[styles.adminStatCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <Text style={[styles.adminStatLabel, { color: colors.muted }]}>Payments</Text>
+              <Text style={[styles.adminStatValue, { color: colors.primary }]}>{payments.length}</Text>
+            </View>
           </View>
 
           <View style={styles.adminGrid}>
@@ -329,11 +355,18 @@ const renderPaymentItem = ({ item, index }: { item: any; index: number }) => (
                 pressed && { opacity: 0.78, transform: [{ scale: 0.98 }] },
               ]}
             >
-              <View style={[styles.adminIcon, { backgroundColor: colors.primary + "18" }]}>
-                <IconSymbol name="dollarsign.circle.fill" size={22} color={colors.primary} />
+              <View style={[styles.adminIcon, { backgroundColor: colors.success + "18" }]}>
+                <IconSymbol name="dollarsign.circle.fill" size={22} color={colors.success} />
               </View>
-              <Text style={[styles.adminTitle, { color: colors.foreground }]}>Payments</Text>
-              <Text style={[styles.adminDesc, { color: colors.muted }]}>Record and manage member payments.</Text>
+
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.adminTitle, { color: colors.foreground }]}>Payments</Text>
+                <Text style={[styles.adminDesc, { color: colors.muted }]}>
+                  Track balances, record payments, and review history.
+                </Text>
+              </View>
+
+              <IconSymbol name="chevron.right" size={18} color={colors.muted} />
             </Pressable>
 
             <Pressable
@@ -347,8 +380,15 @@ const renderPaymentItem = ({ item, index }: { item: any; index: number }) => (
               <View style={[styles.adminIcon, { backgroundColor: colors.primary + "18" }]}>
                 <IconSymbol name="shield.fill" size={22} color={colors.primary} />
               </View>
-              <Text style={[styles.adminTitle, { color: colors.foreground }]}>Users</Text>
-              <Text style={[styles.adminDesc, { color: colors.muted }]}>Promote, deactivate, and manage access.</Text>
+
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.adminTitle, { color: colors.foreground }]}>Users</Text>
+                <Text style={[styles.adminDesc, { color: colors.muted }]}>
+                  Manage roles, access, and active accounts.
+                </Text>
+              </View>
+
+              <IconSymbol name="chevron.right" size={18} color={colors.muted} />
             </Pressable>
           </View>
         </View>
@@ -683,13 +723,53 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 12,
   },
-  adminCard: {
+  adminHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
+  },
+  adminStatusPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+  },
+  adminStatusText: {
+    fontSize: 12,
+    fontWeight: "850",
+  },
+  adminStatsGrid: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  adminStatCard: {
     flex: 1,
-    minHeight: 100,
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 12,
+    gap: 4,
+  },
+  adminStatLabel: {
+    fontSize: 11,
+    fontWeight: "800",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+  },
+  adminStatValue: {
+    fontSize: 18,
+    fontWeight: "950",
+  },
+  adminCard: {
+    minHeight: 96,
     borderWidth: 1,
     borderRadius: 24,
     padding: 15,
-    justifyContent: "space-between",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 13,
   },
   adminIcon: {
     width: 48,
@@ -706,6 +786,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 17,
     fontWeight: "600",
+    marginTop: 4,
   },
 
   historyHeader: {
