@@ -12,6 +12,7 @@ import { useThemeContext } from "@/lib/theme-provider";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const CHAT_MEMBER_KEY = "the_plug_chat_member_id";
+const NOTIFICATION_LAST_SEEN_KEY = "the_plug_notifications_last_seen";
 
 type Section = "menu" | "media" | "devotionals" | "chat" | "notifications" | "about" | "drive" | "popl" | "suggestions";
 
@@ -32,6 +33,7 @@ export default function MoreScreen() {
 
   // Chat member identity
   const [chatMemberId, setChatMemberId] = useState<number | null>(null);
+  const [lastSeenNotificationsAt, setLastSeenNotificationsAt] = useState(0);
   const [showMemberPicker, setShowMemberPicker] = useState(false);
   const [loadingIdentity, setLoadingIdentity] = useState(true);
 
@@ -143,6 +145,17 @@ export default function MoreScreen() {
     );
   };
 
+  useEffect(() => {
+    try {
+      if (Platform.OS === "web" && typeof window !== "undefined") {
+        const saved = window.localStorage.getItem(NOTIFICATION_LAST_SEEN_KEY);
+        setLastSeenNotificationsAt(saved ? Number(saved) || 0 : 0);
+      }
+    } catch (error) {
+      console.warn("Could not load notification read state", error);
+    }
+  }, []);
+
   // Load saved chat identity
   useEffect(() => {
     AsyncStorage.getItem(CHAT_MEMBER_KEY).then((val) => {
@@ -227,6 +240,26 @@ export default function MoreScreen() {
   const getAvatarColor = (id: number) => avatarColors[id % avatarColors.length];
 
   const currentMember = membersList?.find((m) => m.id === chatMemberId);
+
+  const notifications = notificationsList || [];
+  const unreadNotifications = notifications.filter((item: any) => {
+    const createdAt = item.createdAt ? new Date(item.createdAt).getTime() : 0;
+    return createdAt > lastSeenNotificationsAt;
+  });
+  const unreadNotificationCount = unreadNotifications.length;
+
+  const markNotificationsRead = () => {
+    const now = Date.now();
+    setLastSeenNotificationsAt(now);
+
+    try {
+      if (Platform.OS === "web" && typeof window !== "undefined") {
+        window.localStorage.setItem(NOTIFICATION_LAST_SEEN_KEY, String(now));
+      }
+    } catch (error) {
+      console.warn("Could not save notification read state", error);
+    }
+  };
 
   // ---- Media Section ----
   if (section === "media") {
@@ -408,7 +441,18 @@ export default function MoreScreen() {
             <IconSymbol name="arrow.left" size={24} color={colors.foreground} />
           </Pressable>
           <Text style={[styles.subTitle, { color: colors.foreground }]}>Notifications</Text>
-          <View style={{ width: 28 }} />
+          <Pressable
+            onPress={markNotificationsRead}
+            style={({ pressed }) => [
+              styles.markReadButton,
+              { backgroundColor: colors.primary + "15" },
+              pressed && { opacity: 0.7 },
+            ]}
+          >
+            <Text style={[styles.markReadText, { color: colors.primary }]}>
+              Mark all read
+            </Text>
+          </Pressable>
         </View>
 
         <FlatList
@@ -423,8 +467,22 @@ export default function MoreScreen() {
               <Text style={[styles.emptySubtitle, { color: colors.muted }]}>Chat messages, songs, and updates will appear here.</Text>
             </View>
           }
-          renderItem={({ item }) => (
-            <View style={[styles.notificationCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          renderItem={({ item }) => {
+            const isUnread =
+              item.createdAt &&
+              new Date(item.createdAt).getTime() > lastSeenNotificationsAt;
+
+            return (
+            <View
+              style={[
+                styles.notificationCard,
+                {
+                  backgroundColor: isUnread ? colors.primary + "10" : colors.surface,
+                  borderColor: isUnread ? colors.primary + "45" : colors.border,
+                },
+              ]}
+            >
+              {isUnread && <View style={[styles.unreadDot, { backgroundColor: colors.primary }]} />}
               <View style={[styles.notificationIcon, { backgroundColor: colors.primary + "18" }]}>
                 <IconSymbol
                   name={item.type === "chat" ? "bubble.left.fill" : item.type === "song" ? "music.note" : "bell.fill"}
@@ -441,7 +499,8 @@ export default function MoreScreen() {
                 </Text>
               </View>
             </View>
-          )}
+          );
+          }}
         />
       </ScreenContainer>
     );
@@ -1112,8 +1171,21 @@ export default function MoreScreen() {
               <IconSymbol name={item.icon} size={22} color={item.key === "drive" ? "#4285F4" : item.key === "popl" ? "#6C5CE7" : item.key === "suggestions" ? "#F59E0B" : colors.primary} />
             </View>
             <View style={styles.menuInfo}>
-              <Text style={[styles.menuLabel, { color: colors.foreground }]}>{item.label}</Text>
-              <Text style={[styles.menuDesc, { color: colors.muted }]}>{item.desc}</Text>
+              <View style={styles.menuLabelRow}>
+                <Text style={[styles.menuLabel, { color: colors.foreground }]}>{item.label}</Text>
+                {item.key === "notifications" && unreadNotificationCount > 0 && (
+                  <View style={[styles.unreadBadge, { backgroundColor: colors.primary }]}>
+                    <Text style={styles.unreadBadgeText}>
+                      {unreadNotificationCount > 99 ? "99+" : unreadNotificationCount}
+                    </Text>
+                  </View>
+                )}
+              </View>
+              <Text style={[styles.menuDesc, { color: colors.muted }]}>
+                {item.key === "notifications" && unreadNotificationCount > 0
+                  ? `${unreadNotificationCount} unread update${unreadNotificationCount === 1 ? "" : "s"}`
+                  : item.desc}
+              </Text>
             </View>
             <IconSymbol name="chevron.right" size={18} color={colors.muted} />
           </Pressable>
@@ -1133,7 +1205,10 @@ const styles = StyleSheet.create({
   menuIcon: { width: 48, height: 48, borderRadius: 14, justifyContent: "center", alignItems: "center" },
   menuInfo: { flex: 1, gap: 2 },
   menuLabel: { fontSize: 16, fontWeight: "700" },
+  menuLabelRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   menuDesc: { fontSize: 13 },
+  unreadBadge: { minWidth: 22, height: 22, borderRadius: 11, alignItems: "center", justifyContent: "center", paddingHorizontal: 6 },
+  unreadBadgeText: { color: "#FFF", fontSize: 11, fontWeight: "900" },
   listContent: { paddingHorizontal: 20, paddingBottom: 32, gap: 8 },
   devotionalCard: { flexDirection: "row", alignItems: "center", padding: 14, borderRadius: 14, borderWidth: 1, gap: 12 },
   devotionalIcon: { width: 44, height: 44, borderRadius: 12, justifyContent: "center", alignItems: "center" },
@@ -1149,7 +1224,10 @@ const styles = StyleSheet.create({
   uploadBanner: { flexDirection: "row", alignItems: "center", justifyContent: "center", paddingVertical: 10, gap: 8, marginHorizontal: 20, borderRadius: 12, marginBottom: 8 },
   uploadText: { fontSize: 14, fontWeight: "600" },
   // Chat styles
-  notificationCard: { flexDirection: "row", alignItems: "flex-start", gap: 12, padding: 16, borderRadius: 16, borderWidth: 1, marginBottom: 10 },
+  notificationCard: { flexDirection: "row", alignItems: "flex-start", gap: 12, padding: 16, borderRadius: 16, borderWidth: 1, marginBottom: 10, position: "relative" },
+  unreadDot: { position: "absolute", top: 12, right: 12, width: 9, height: 9, borderRadius: 5 },
+  markReadButton: { paddingHorizontal: 10, paddingVertical: 7, borderRadius: 999 },
+  markReadText: { fontSize: 12, fontWeight: "800" },
   notificationIcon: { width: 36, height: 36, borderRadius: 18, justifyContent: "center", alignItems: "center" },
   notificationTitle: { fontSize: 15, fontWeight: "800", marginBottom: 4 },
   notificationMessage: { fontSize: 14, lineHeight: 19 },
