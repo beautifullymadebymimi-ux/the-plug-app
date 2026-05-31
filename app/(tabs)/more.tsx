@@ -448,37 +448,19 @@ export default function MoreScreen() {
 
   // ---- Chat Section ----
   if (section === "help") {
+    const quickSteps = [
+      { number: "01", title: "Start on Home", body: "Catch unread notifications and the latest updates." },
+      { number: "02", title: "Open More", body: "Use Notifications, Chat, Help, Drive, and Settings." },
+      { number: "03", title: "Practice Ready", body: "Use Songs and Setlists for tracks, notes, and assignments." },
+    ];
+
     const helpItems = [
-      {
-        icon: "bell.fill" as const,
-        title: "Check Notifications",
-        body: "Use More → Notifications to see new chat messages, songs, events, and app updates. Tap Mark all read when you are caught up.",
-      },
-      {
-        icon: "bubble.left.fill" as const,
-        title: "Use Group Chat",
-        body: "Go to More → Group Chat, select your name, then send messages to the team. New chat messages also create notifications.",
-      },
-      {
-        icon: "music.note" as const,
-        title: "Practice Songs",
-        body: "Open Songs, choose a song, then review lyrics, rehearsal notes, assignments, and MP3 practice tracks.",
-      },
-      {
-        icon: "music.note.list" as const,
-        title: "Use Setlists",
-        body: "Go to Songs → Setlists to view service setlists, readiness badges, and song order for rehearsal or service.",
-      },
-      {
-        icon: "person.2.fill" as const,
-        title: "Update Member Profiles",
-        body: "Use Members to view profiles, vocal parts, instruments, photos, and contact details.",
-      },
-      {
-        icon: "calendar" as const,
-        title: "RSVP for Events",
-        body: "Open an event to RSVP as Going, Maybe, or Can’t make it. Leaders can see responses on the event page.",
-      },
+      { icon: "bell.fill" as const, color: "#8B5CF6", title: "Notifications", body: "Stay caught up on chat messages, songs, events, and app updates." },
+      { icon: "bubble.left.fill" as const, color: "#3B82F6", title: "Group Chat", body: "Select your name and message the worship team in one shared space." },
+      { icon: "music.note" as const, color: "#10B981", title: "Songs", body: "Review lyrics, MP3 practice tracks, rehearsal notes, and assignments." },
+      { icon: "music.note.list" as const, color: "#F59E0B", title: "Setlists", body: "View worship sets, song order, readiness badges, and planning details." },
+      { icon: "person.2.fill" as const, color: "#EC4899", title: "Members", body: "Find profiles, vocal parts, instruments, photos, and contact details." },
+      { icon: "calendar" as const, color: "#EF4444", title: "Events & RSVP", body: "Let the team know if you’re going, maybe, or unavailable." },
     ];
 
     return (
@@ -492,30 +474,102 @@ export default function MoreScreen() {
         </View>
 
         <ScrollView contentContainerStyle={styles.helpContent} showsVerticalScrollIndicator={false}>
-          <View style={[styles.helpIntroCard, { backgroundColor: colors.primary + "12", borderColor: colors.primary + "35" }]}>
-            <IconSymbol name="book.fill" size={26} color={colors.primary} />
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.helpIntroTitle, { color: colors.foreground }]}>Welcome to The Plug</Text>
-              <Text style={[styles.helpIntroText, { color: colors.muted }]}>
-                Use this guide to quickly learn where to find worship updates, chat, songs, setlists, and member tools.
-              </Text>
+          <View
+            style={[
+              styles.helpHeroCard,
+              {
+                backgroundColor: colors.primary + "12",
+                borderColor: colors.primary + "35",
+              },
+            ]}
+          >
+            <View style={styles.helpHeroTopRow}>
+              <View style={[styles.helpHeroIcon, { backgroundColor: colors.primary }]}>
+                <IconSymbol name="sparkles" size={26} color="#FFF" />
+              </View>
+
+              <View style={[styles.helpHeroPill, { backgroundColor: colors.primary + "18" }]}>
+                <Text style={[styles.helpHeroPillText, { color: colors.primary }]}>TEAM GUIDE</Text>
+              </View>
             </View>
+
+            <Text style={[styles.helpHeroTitle, { color: colors.foreground }]}>
+              Stay ready. Stay connected. Stay plugged in.
+            </Text>
+
+            <Text style={[styles.helpHeroText, { color: colors.muted }]}>
+              A quick guide to worship updates, chat, songs, setlists, member tools, and event RSVPs.
+            </Text>
           </View>
 
-          {helpItems.map((item) => (
-            <View
-              key={item.title}
-              style={[styles.helpCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
-            >
-              <View style={[styles.helpIcon, { backgroundColor: colors.primary + "18" }]}>
-                <IconSymbol name={item.icon} size={19} color={colors.primary} />
+          <View style={styles.helpStepGrid}>
+            {quickSteps.map((step) => (
+              <View
+                key={step.number}
+                style={[
+                  styles.helpStepCard,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: colors.border,
+                  },
+                ]}
+              >
+                <Text style={[styles.helpStepNumberText, { color: colors.primary }]}>
+                  {step.number}
+                </Text>
+                <Text style={[styles.helpStepTitle, { color: colors.foreground }]}>
+                  {step.title}
+                </Text>
+                <Text style={[styles.helpStepBody, { color: colors.muted }]}>
+                  {step.body}
+                </Text>
               </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.helpTitle, { color: colors.foreground }]}>{item.title}</Text>
-                <Text style={[styles.helpBody, { color: colors.muted }]}>{item.body}</Text>
+            ))}
+          </View>
+
+          <View style={styles.helpSectionHeader}>
+            <Text style={[styles.helpSectionEyebrow, { color: colors.primary }]}>FEATURES</Text>
+            <Text style={[styles.helpSectionTitle, { color: colors.foreground }]}>
+              What you can do
+            </Text>
+          </View>
+
+          <View style={styles.helpFeatureGrid}>
+            {helpItems.map((item) => (
+              <View
+                key={item.title}
+                style={[
+                  styles.helpFeatureCard,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: colors.border,
+                  },
+                ]}
+              >
+                <View style={[styles.helpFeatureIcon, { backgroundColor: item.color + "18" }]}>
+                  <IconSymbol name={item.icon} size={20} color={item.color} />
+                </View>
+
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.helpFeatureTitle, { color: colors.foreground }]}>
+                    {item.title}
+                  </Text>
+                  <Text style={[styles.helpFeatureBody, { color: colors.muted }]}>
+                    {item.body}
+                  </Text>
+                </View>
               </View>
+            ))}
+          </View>
+
+          <View style={[styles.helpTipCard, { backgroundColor: colors.foreground + "06", borderColor: colors.border }]}>
+            <View style={[styles.helpTipIcon, { backgroundColor: "#10B98118" }]}>
+              <IconSymbol name="lightbulb.fill" size={18} color="#10B981" />
             </View>
-          ))}
+            <Text style={[styles.helpTipText, { color: colors.foreground }]}>
+              Pro tip: Start on Home. It shows unread notifications and What’s New so you can catch up fast.
+            </Text>
+          </View>
         </ScrollView>
       </ScreenContainer>
     );
