@@ -51,6 +51,8 @@ export default function HomeScreen() {
     return createdAt > lastSeenNotificationsAt;
   }).length;
 
+  const latestUpdates = notifications.slice(0, 3);
+
   return (
     <ScreenContainer>
       <ScrollView
@@ -141,6 +143,81 @@ export default function HomeScreen() {
                 <Text style={[styles.featuredMeta, { color: colors.muted }]}>Upcoming rehearsals and events will appear here.</Text>
               </View>
             </View>
+          )}
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <View>
+              <Text style={[styles.sectionEyebrow, { color: colors.primary }]}>LATEST</Text>
+              <Text style={[styles.sectionTitle, { color: colors.foreground }]}>What’s New</Text>
+            </View>
+            <Pressable
+              onPress={() => router.push("/(tabs)/more" as any)}
+              style={({ pressed }) => [
+                styles.seeAllPill,
+                { borderColor: colors.border },
+                pressed && { opacity: 0.6 },
+              ]}
+            >
+              <Text style={[styles.seeAll, { color: colors.primary }]}>View All</Text>
+            </Pressable>
+          </View>
+
+          {latestUpdates.length > 0 ? (
+            <View style={styles.whatsNewList}>
+              {latestUpdates.map((item: any) => {
+                const isUnread = item.createdAt && new Date(item.createdAt).getTime() > lastSeenNotificationsAt;
+                const iconName =
+                  item.type === "chat"
+                    ? "bubble.left.fill"
+                    : item.type === "song"
+                      ? "music.note"
+                      : item.type === "event"
+                        ? "calendar"
+                        : "bell.fill";
+
+                return (
+                  <Pressable
+                    key={item.id}
+                    onPress={() => router.push("/(tabs)/more" as any)}
+                    style={({ pressed }) => [
+                      styles.whatsNewCard,
+                      {
+                        backgroundColor: isUnread ? colors.primary + "10" : colors.surface,
+                        borderColor: isUnread ? colors.primary + "45" : colors.border,
+                      },
+                      pressed && { opacity: 0.78, transform: [{ scale: 0.98 }] },
+                    ]}
+                  >
+                    <View style={[styles.whatsNewIcon, { backgroundColor: colors.primary + "18" }]}>
+                      <IconSymbol name={iconName as any} size={18} color={colors.primary} />
+                    </View>
+
+                    <View style={{ flex: 1 }}>
+                      <View style={styles.whatsNewTitleRow}>
+                        <Text style={[styles.whatsNewTitle, { color: colors.foreground }]} numberOfLines={1}>
+                          {item.title}
+                        </Text>
+                        {isUnread && <View style={[styles.whatsNewUnreadDot, { backgroundColor: colors.primary }]} />}
+                      </View>
+                      <Text style={[styles.whatsNewMessage, { color: colors.muted }]} numberOfLines={2}>
+                        {item.message}
+                      </Text>
+                    </View>
+
+                    <IconSymbol name="chevron.right" size={16} color={colors.muted} />
+                  </Pressable>
+                );
+              })}
+            </View>
+          ) : (
+            <PremiumEmptyCard
+              colors={colors}
+              icon="bell.fill"
+              title="No updates yet"
+              subtitle="New chat messages, songs, events, and announcements will appear here."
+            />
           )}
         </View>
 
@@ -483,6 +560,44 @@ const styles = StyleSheet.create({
   seeAll: {
     fontSize: 13,
     fontWeight: "800",
+  },
+  whatsNewList: {
+    gap: 10,
+  },
+  whatsNewCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 14,
+    borderRadius: 18,
+    borderWidth: 1,
+  },
+  whatsNewIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  whatsNewTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  whatsNewTitle: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: "850",
+  },
+  whatsNewMessage: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginTop: 2,
+  },
+  whatsNewUnreadDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   eventCarousel: {
     gap: 12,
