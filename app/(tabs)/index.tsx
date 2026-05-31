@@ -70,7 +70,7 @@ export default function HomeScreen() {
     return createdAt > lastSeenNotificationsAt;
   }).length;
 
-  const latestUpdates = notifications.slice(0, 3);
+  const latestUpdates = notifications.slice(0, 1);
 
   return (
     <ScreenContainer>
