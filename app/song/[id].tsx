@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Text, View, Pressable, StyleSheet, ScrollView, Linking, Platform, TextInput, Alert, Modal, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
@@ -356,28 +356,38 @@ export default function SongDetailScreen() {
                 <IconSymbol name="trash" size={16} color={colors.error} />
               </Pressable>
             </View>
-            <View style={styles.audioControls}>
-              <Pressable
-                onPress={handlePlayPause}
-                style={({ pressed }) => [styles.playButton, { backgroundColor: colors.primary }, pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] }]}
-              >
-                <IconSymbol name={status.playing ? "pause.fill" : "play.fill"} size={24} color="#FFF" />
-              </Pressable>
-              <View style={styles.audioProgress}>
-                <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
-                  <View
-                    style={[
-                      styles.progressFill,
-                      { backgroundColor: colors.primary, width: status.duration > 0 ? `${(status.currentTime / status.duration) * 100}%` : "0%" },
-                    ]}
-                  />
-                </View>
-                <View style={styles.timeRow}>
-                  <Text style={[styles.timeText, { color: colors.muted }]}>{formatTime(status.currentTime)}</Text>
-                  <Text style={[styles.timeText, { color: colors.muted }]}>{formatTime(status.duration)}</Text>
+            {Platform.OS === "web" ? (
+              <View style={styles.webAudioWrap}>
+                {React.createElement("audio", {
+                  controls: true,
+                  src: song.audioUrl,
+                  style: { width: "100%" },
+                })}
+              </View>
+            ) : (
+              <View style={styles.audioControls}>
+                <Pressable
+                  onPress={handlePlayPause}
+                  style={({ pressed }) => [styles.playButton, { backgroundColor: colors.primary }, pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] }]}
+                >
+                  <IconSymbol name={status.playing ? "pause.fill" : "play.fill"} size={24} color="#FFF" />
+                </Pressable>
+                <View style={styles.audioProgress}>
+                  <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
+                    <View
+                      style={[
+                        styles.progressFill,
+                        { backgroundColor: colors.primary, width: status.duration > 0 ? `${(status.currentTime / status.duration) * 100}%` : "0%" },
+                      ]}
+                    />
+                  </View>
+                  <View style={styles.timeRow}>
+                    <Text style={[styles.timeText, { color: colors.muted }]}>{formatTime(status.currentTime)}</Text>
+                    <Text style={[styles.timeText, { color: colors.muted }]}>{formatTime(status.duration)}</Text>
+                  </View>
                 </View>
               </View>
-            </View>
+            )}
 
             <Pressable
               onPress={handleRemoveAudio}
