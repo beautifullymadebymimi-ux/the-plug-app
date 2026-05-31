@@ -271,6 +271,33 @@ function PremiumEmptyCard({
 }
 
 const styles = StyleSheet.create({
+  notificationPromptCard: {
+    marginTop: 16,
+    marginBottom: 16,
+    padding: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  notificationPromptIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  notificationPromptTitle: {
+    fontSize: 16,
+    fontWeight: "800",
+    marginBottom: 3,
+  },
+  notificationPromptText: {
+    fontSize: 13,
+    lineHeight: 18,
+  },
+
   scrollContent: {
     paddingHorizontal: 18,
     paddingTop: 10,
