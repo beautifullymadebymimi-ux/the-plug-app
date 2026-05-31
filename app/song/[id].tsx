@@ -441,7 +441,7 @@ export default function SongDetailScreen() {
                   <IconSymbol name="icloud.and.arrow.up" size={24} color={colors.primary} />
                 </View>
                 <Text style={[styles.uploadTitle, { color: colors.foreground }]}>Upload Audio</Text>
-                <Text style={[styles.uploadSubtitle, { color: colors.muted }]}>MP3, WAV, M4A (max 50 MB)</Text>
+                <Text style={[styles.uploadSubtitle, { color: colors.muted }]}>MP3 only (max 50 MB)</Text>
               </View>
             )}
           </Pressable>
