@@ -43,6 +43,18 @@ export async function updateUserRole(email: string, role: "user" | "admin") {
     .where(eq(users.email, email));
 }
 
+export async function updateUser(id: number, data: Partial<typeof users.$inferInsert>) {
+  const dbConn = await getDb();
+  if (!dbConn) throw new Error("Database not available");
+
+  await dbConn
+    .update(users)
+    .set(data)
+    .where(eq(users.id, id));
+
+  return { success: true };
+}
+
 export async function upsertUser(user: InsertUser): Promise<void> {
   if (!user.openId) {
     throw new Error("User openId is required for upsert");

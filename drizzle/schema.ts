@@ -182,6 +182,7 @@ export const users = mysqlTable("users", {
 	lastSignedIn: timestamp({ mode: 'string' }).default(sql`(now())`).notNull(),
 	isActive: tinyint().default(1).notNull(),
 	passwordHash: text(),
+	expoPushToken: text(),
 },
 (table) => [
 	primaryKey({ columns: [table.id], name: "users_id"}),
