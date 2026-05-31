@@ -416,6 +416,17 @@ export async function removeSongFromSetlist(id: number) {
   await db.delete(setlistSongs).where(eq(setlistSongs.id, id));
 }
 
+export async function deleteSetlist(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  // Delete setlist songs first so there are no orphaned rows.
+  await db.delete(setlistSongs).where(eq(setlistSongs.setlistId, id));
+  await db.delete(setlists).where(eq(setlists.id, id));
+
+  return { success: true };
+}
+
 // ─── Media ───────────────────────────────────────────────
 export async function getMedia() {
   const db = await getDb();

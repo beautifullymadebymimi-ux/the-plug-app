@@ -379,6 +379,9 @@ export const appRouter = router({
     removeSong: publicProcedure
       .input(z.object({ id: z.number() }))
       .mutation(({ input }) => db.removeSongFromSetlist(input.id)),
+    delete: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(({ input }) => db.deleteSetlist(input.id)),
   }),
 
   media: router({

@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { FlatList, Text, View, Pressable, StyleSheet, TextInput, Modal, ScrollView, Platform, Linking } from "react-native";
+import { FlatList, Text, View, Pressable, StyleSheet, TextInput, Modal, ScrollView, Platform, Linking, Alert } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
@@ -42,6 +42,17 @@ export default function SongsScreen() {
   const createSong = trpc.songs.create.useMutation({ onSuccess: () => { refetchSongs(); setShowCreateSong(false); resetSongForm(); } });
   const createSetlist = trpc.setlists.create.useMutation();
   const addSongToSetlist = trpc.setlists.addSong.useMutation();
+  const deleteSetlist = trpc.setlists.delete.useMutation({
+    onSuccess: () => {
+      refetchSetlists();
+      if (Platform.OS !== "web") {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      }
+    },
+    onError: (err) => {
+      Alert.alert("Error", err.message || "Could not delete setlist.");
+    },
+  });
 
   const resetSongForm = () => { setNewTitle(""); setNewArtist(""); setNewKey(""); setNewTempo(""); setNewLyrics(""); setNewYoutubeUrl(""); setNewSpotifyUrl("");
     setNewAppleMusicUrl(""); };
@@ -120,6 +131,26 @@ export default function SongsScreen() {
     if (!url) return;
     const cleanUrl = url.startsWith("http") ? url : `https://${url}`;
     await Linking.openURL(cleanUrl);
+  };
+
+
+  const handleDeleteSetlist = (setlistId: number, title: string) => {
+    const message = `Delete "${title}"?\n\nThis will remove the setlist and all songs attached to it. The songs themselves will stay in your song library.`;
+
+    if (Platform.OS === "web") {
+      if (!window.confirm(message)) return;
+      deleteSetlist.mutate({ id: setlistId });
+      return;
+    }
+
+    Alert.alert("Delete Setlist", message, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => deleteSetlist.mutate({ id: setlistId }),
+      },
+    ]);
   };
 
   const handleAddPress = () => {
@@ -315,7 +346,21 @@ export default function SongsScreen() {
                   </View>
                 )}
               </View>
-              <IconSymbol name="chevron.right" size={18} color={colors.muted} />
+              <View style={styles.setlistActions}>
+                <Pressable
+                  onPress={() => handleDeleteSetlist(item.id, item.title)}
+                  disabled={deleteSetlist.isPending}
+                  style={({ pressed }) => [
+                    styles.deleteSetlistButton,
+                    { backgroundColor: colors.error + "14" },
+                    pressed && { opacity: 0.7 },
+                  ]}
+                >
+                  <IconSymbol name="trash" size={15} color={colors.error} />
+                </Pressable>
+
+                <IconSymbol name="chevron.right" size={18} color={colors.muted} />
+              </View>
             </Pressable>
             );
           }}
