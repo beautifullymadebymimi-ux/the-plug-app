@@ -159,7 +159,7 @@ export default function HomeScreen() {
           ]}
         >
           <View style={[styles.helpPromptIcon, { backgroundColor: "#10B98120" }]}>
-            <IconSymbol name="book.fill" size={22} color="#10B981" />
+            <IconSymbol name="sparkles" size={22} color="#10B981" />
           </View>
 
           <View style={{ flex: 1 }}>
@@ -167,7 +167,7 @@ export default function HomeScreen() {
               Learn The Plug in 2 minutes
             </Text>
             <Text style={[styles.helpPromptText, { color: colors.muted }]}>
-              Quick guide for chat, notifications, songs, setlists, profiles, and RSVP.
+              Chat, notifications, songs, setlists, profiles, and RSVPs — all in one quick guide.
             </Text>
           </View>
 
