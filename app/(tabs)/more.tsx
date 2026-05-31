@@ -252,12 +252,23 @@ export default function MoreScreen() {
   const unreadNotificationCount = unreadNotifications.length;
 
   const markNotificationsRead = () => {
-    const now = Date.now();
-    setLastSeenNotificationsAt(now);
+    const newestNotificationTime = Math.max(
+      Date.now(),
+      ...notifications.map((item: any) =>
+        item.createdAt ? new Date(item.createdAt).getTime() : 0
+      )
+    );
+
+    const readThroughTime = newestNotificationTime + 1000;
+
+    setLastSeenNotificationsAt(readThroughTime);
 
     try {
       if (Platform.OS === "web" && typeof window !== "undefined") {
-        window.localStorage.setItem(NOTIFICATION_LAST_SEEN_KEY, String(now));
+        window.localStorage.setItem(
+          NOTIFICATION_LAST_SEEN_KEY,
+          String(readThroughTime)
+        );
       }
     } catch (error) {
       console.warn("Could not save notification read state", error);
