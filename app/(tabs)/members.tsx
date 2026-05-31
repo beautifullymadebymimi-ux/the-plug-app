@@ -14,6 +14,33 @@ const VOICE_TYPES = ["Soprano", "Alto", "Tenor", "Baritone", "Bass"];
 const INTERESTS = ["Song Writer", "Photography", "Graphics", "Fashion", "Admin", "Production", "Dance", "Acting", "Poetry", "Social Media"];
 const FILTER_CHIPS = ["All", "Vocalist", "Musician", "Worship Leader", "Choir Director", "Sound Tech", "Media"];
 
+
+function getVoiceTypeColor(voiceType?: string | null) {
+  const value = (voiceType || "").toLowerCase();
+
+  if (value.includes("soprano")) {
+    return { color: "#8B5CF6", background: "#8B5CF620" };
+  }
+
+  if (value.includes("alto")) {
+    return { color: "#EC4899", background: "#EC489920" };
+  }
+
+  if (value.includes("tenor")) {
+    return { color: "#3B82F6", background: "#3B82F620" };
+  }
+
+  if (value.includes("bass")) {
+    return { color: "#10B981", background: "#10B98120" };
+  }
+
+  if (value.includes("choir")) {
+    return { color: "#F59E0B", background: "#F59E0B20" };
+  }
+
+  return { color: "#64748B", background: "#64748B20" };
+}
+
 export default function MembersScreen() {
   const colors = useColors();
   const router = useRouter();
@@ -237,7 +264,17 @@ export default function MembersScreen() {
             style={({ pressed }) => [styles.memberCard, { backgroundColor: colors.surface, borderColor: colors.border }, pressed && { opacity: 0.7 }]}
           >
             {(item as any).profileImageUrl ? (
-              <Image source={{ uri: (item as any).profileImageUrl }} style={styles.avatarImage} />
+              <Image
+                source={{ uri: (item as any).profileImageUrl }}
+                style={[
+                  styles.avatarImage,
+                  {
+                    borderColor: (item as any).voiceType
+                      ? getVoiceTypeColor((item as any).voiceType).color
+                      : "transparent",
+                  },
+                ]}
+              />
             ) : (
               <View style={[styles.avatar, { backgroundColor: getAvatarColor(item.id) }]}>
                 <Text style={styles.avatarText}>{getInitials(item.name)}</Text>
@@ -472,7 +509,8 @@ const styles = StyleSheet.create({
   columnWrapper: { gap: 12 },
   memberCard: { flex: 1, padding: 20, borderRadius: 16, borderWidth: 1, alignItems: "center", gap: 6 },
   avatar: { width: 60, height: 60, borderRadius: 30, justifyContent: "center", alignItems: "center" },
-  avatarImage: { width: 60, height: 60, borderRadius: 30 },
+  avatarImage: { width: 60, height: 60, borderRadius: 30, borderWidth: 2 },
+  voiceTypeBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999, marginTop: 2 },
   avatarText: { color: "#FFF", fontSize: 22, fontWeight: "700" },
   memberName: { fontSize: 15, fontWeight: "700", textAlign: "center" },
   memberRole: { fontSize: 12, fontWeight: "600", textAlign: "center" },

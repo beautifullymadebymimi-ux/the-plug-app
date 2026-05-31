@@ -13,6 +13,33 @@ const INSTRUMENTS = ["Vocals", "Piano/Keys", "Guitar", "Bass", "Drums", "Saxopho
 const VOICE_TYPES = ["Soprano", "Alto", "Tenor", "Baritone", "Bass"];
 const INTERESTS = ["Song Writer", "Photography", "Graphics", "Fashion", "Admin", "Production", "Dance", "Acting", "Poetry", "Social Media"];
 
+
+function getVoiceTypeColor(voiceType?: string | null) {
+  const value = (voiceType || "").toLowerCase();
+
+  if (value.includes("soprano")) {
+    return { color: "#8B5CF6", background: "#8B5CF620" };
+  }
+
+  if (value.includes("alto")) {
+    return { color: "#EC4899", background: "#EC489920" };
+  }
+
+  if (value.includes("tenor")) {
+    return { color: "#3B82F6", background: "#3B82F620" };
+  }
+
+  if (value.includes("bass")) {
+    return { color: "#10B981", background: "#10B98120" };
+  }
+
+  if (value.includes("choir")) {
+    return { color: "#F59E0B", background: "#F59E0B20" };
+  }
+
+  return { color: "#64748B", background: "#64748B20" };
+}
+
 export default function MemberDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const colors = useColors();
@@ -200,7 +227,17 @@ export default function MemberDetailScreen() {
         {/* Profile Header */}
         <View style={styles.profileHeader}>
           {(member as any).profileImageUrl ? (
-            <Image source={{ uri: (member as any).profileImageUrl }} style={styles.avatarImage} />
+            <Image
+              source={{ uri: (member as any).profileImageUrl }}
+              style={[
+                styles.avatarImage,
+                {
+                  borderColor: (member as any).voiceType
+                    ? getVoiceTypeColor((member as any).voiceType).color
+                    : "transparent",
+                },
+              ]}
+            />
           ) : (
             <View style={[styles.avatar, { backgroundColor: getAvatarColor(member.id) }]}>
               <Text style={styles.avatarText}>
@@ -216,8 +253,24 @@ export default function MemberDetailScreen() {
               </View>
             )}
             {(member as any).voiceType && (
-              <View style={[styles.roleBadge, { backgroundColor: "#8B5CF620" }]}>
-                <Text style={[styles.roleText, { color: "#8B5CF6" }]}>{(member as any).voiceType}</Text>
+              <View
+                style={[
+                  styles.roleBadge,
+                  {
+                    backgroundColor: getVoiceTypeColor((member as any).voiceType).background,
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.roleText,
+                    {
+                      color: getVoiceTypeColor((member as any).voiceType).color,
+                    },
+                  ]}
+                >
+                  {(member as any).voiceType}
+                </Text>
               </View>
             )}
           </View>
@@ -227,7 +280,11 @@ export default function MemberDetailScreen() {
         <View style={[styles.infoCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           {(member as any).voiceType && (
             <View style={styles.infoRow}>
-              <IconSymbol name="music.note" size={18} color={"#8B5CF6"} />
+              <IconSymbol
+                name="music.note"
+                size={18}
+                color={getVoiceTypeColor((member as any).voiceType).color}
+              />
               <View style={styles.infoContent}>
                 <Text style={[styles.infoLabel, { color: colors.muted }]}>Voice Type</Text>
                 <Text style={[styles.infoValue, { color: colors.foreground }]}>{(member as any).voiceType}</Text>
@@ -536,7 +593,7 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 20, paddingBottom: 40, gap: 20 },
   profileHeader: { alignItems: "center", gap: 12, paddingVertical: 16 },
   avatar: { width: 100, height: 100, borderRadius: 50, justifyContent: "center", alignItems: "center" },
-  avatarImage: { width: 100, height: 100, borderRadius: 50 },
+  avatarImage: { width: 100, height: 100, borderRadius: 50, borderWidth: 3 },
   avatarText: { color: "#FFF", fontSize: 36, fontWeight: "700" },
   memberName: { fontSize: 26, fontWeight: "800" },
   badgeRow: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 8 },
