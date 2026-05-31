@@ -2,6 +2,8 @@ import * as Api from "@/lib/_core/api";
 import * as Auth from "@/lib/_core/auth";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Platform } from "react-native";
+import { trpc } from "@/lib/trpc";
+import { registerForNotifications } from "@/lib/notifications";
 
 type UseAuthOptions = {
   autoFetch?: boolean;
@@ -12,6 +14,12 @@ export function useAuth(options?: UseAuthOptions) {
   const [user, setUser] = useState<Auth.User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+
+  const savePushTokenMutation = trpc.push.savePushToken.useMutation({
+    onError: (err) => {
+      console.warn("[Push] Failed to save push token:", err.message);
+    },
+  });
 
   const fetchUser = useCallback(async () => {
     console.log("[useAuth] fetchUser called");
@@ -133,6 +141,32 @@ export function useAuth(options?: UseAuthOptions) {
       error: error?.message,
     });
   }, [user, loading, isAuthenticated, error]);
+
+  useEffect(() => {
+    if (Platform.OS === "web") return;
+    if (!user?.id) return;
+
+    let cancelled = false;
+
+    async function registerAndSavePushToken() {
+      try {
+        const token = await registerForNotifications();
+
+        if (!token || cancelled) return;
+
+        savePushTokenMutation.mutate({ token });
+        console.log("[Push] Expo push token saved");
+      } catch (err) {
+        console.warn("[Push] Could not register for notifications:", err);
+      }
+    }
+
+    registerAndSavePushToken();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
 
   return {
     user,
