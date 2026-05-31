@@ -100,7 +100,10 @@ export default function MoreScreen() {
   const { data: mediaList, refetch: refetchMedia } = trpc.media.list.useQuery(undefined, { enabled: section === "media" });
   const { data: devotionalsList, refetch: refetchDevotionals } = trpc.devotionals.list.useQuery(undefined, { enabled: section === "devotionals" });
   const { data: chatMessages, refetch: refetchChat } = trpc.chat.messages.useQuery(undefined, { enabled: section === "chat", refetchInterval: section === "chat" ? 3000 : false });
-  const { data: notificationsList } = trpc.notifications.list.useQuery(undefined, { enabled: section === "notifications" });
+  const { data: notificationsList } = trpc.notifications.list.useQuery(undefined, {
+    enabled: section === "menu" || section === "notifications",
+    refetchInterval: section === "menu" || section === "notifications" ? 5000 : false,
+  });
   const sendMessage = trpc.chat.send.useMutation({ onSuccess: () => { refetchChat(); setChatInput(""); } });
   const createDevotional = trpc.devotionals.create.useMutation({
     onSuccess: (_data, variables) => {
