@@ -361,8 +361,26 @@ export default function SongDetailScreen() {
                 {React.createElement("audio", {
                   controls: true,
                   src: song.audioUrl,
+                  preload: "metadata",
                   style: { width: "100%" },
                 })}
+
+                <Pressable
+                  onPress={() => Linking.openURL(song.audioUrl!)}
+                  style={({ pressed }) => [
+                    styles.openAudioButton,
+                    {
+                      backgroundColor: colors.primary + "12",
+                      borderColor: colors.primary + "35",
+                    },
+                    pressed && { opacity: 0.75 },
+                  ]}
+                >
+                  <IconSymbol name="arrow.up.right" size={16} color={colors.primary} />
+                  <Text style={[styles.openAudioText, { color: colors.primary }]}>
+                    Open Audio File
+                  </Text>
+                </Pressable>
               </View>
             ) : (
               <View style={styles.audioControls}>
