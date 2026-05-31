@@ -56,6 +56,7 @@ export default function MemberDetailScreen() {
   const [editBio, setEditBio] = useState("");
   const [editInterests, setEditInterests] = useState<string[]>([]);
   const [editImage, setEditImage] = useState<{ base64: string; mimeType: string; uri: string } | null>(null);
+  const [removeImage, setRemoveImage] = useState(false);
 
   const deleteMutation = trpc.members.delete.useMutation({
     onSuccess: () => {
