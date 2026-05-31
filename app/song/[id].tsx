@@ -202,8 +202,8 @@ export default function SongDetailScreen() {
       if (result.canceled) return;
 
       const asset = result.assets[0];
-      if (asset.size && asset.size > 16 * 1024 * 1024) {
-        Alert.alert("File Too Large", "Audio files must be under 16 MB.");
+      if (asset.size && asset.size > 50 * 1024 * 1024) {
+        Alert.alert("File Too Large", "Audio files must be under 50 MB.");
         return;
       }
 
@@ -390,7 +390,7 @@ export default function SongDetailScreen() {
                   <IconSymbol name="icloud.and.arrow.up" size={24} color={colors.primary} />
                 </View>
                 <Text style={[styles.uploadTitle, { color: colors.foreground }]}>Upload Audio</Text>
-                <Text style={[styles.uploadSubtitle, { color: colors.muted }]}>MP3, WAV, M4A (max 16 MB)</Text>
+                <Text style={[styles.uploadSubtitle, { color: colors.muted }]}>MP3, WAV, M4A (max 50 MB)</Text>
               </View>
             )}
           </Pressable>
