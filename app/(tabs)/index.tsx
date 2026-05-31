@@ -146,6 +146,34 @@ export default function HomeScreen() {
           )}
         </View>
 
+
+        <Pressable
+          onPress={() => router.push("/(tabs)/more?section=help" as any)}
+          style={({ pressed }) => [
+            styles.helpPromptCard,
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+            },
+            pressed && { opacity: 0.82, transform: [{ scale: 0.98 }] },
+          ]}
+        >
+          <View style={[styles.helpPromptIcon, { backgroundColor: "#10B98120" }]}>
+            <IconSymbol name="book.fill" size={22} color="#10B981" />
+          </View>
+
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.helpPromptTitle, { color: colors.foreground }]}>
+              New here? Learn how to use The Plug
+            </Text>
+            <Text style={[styles.helpPromptText, { color: colors.muted }]}>
+              Quick guide for chat, notifications, songs, setlists, profiles, and RSVP.
+            </Text>
+          </View>
+
+          <IconSymbol name="chevron.right" size={20} color={colors.muted} />
+        </Pressable>
+
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <View>
