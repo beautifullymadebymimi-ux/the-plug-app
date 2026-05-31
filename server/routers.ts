@@ -110,6 +110,7 @@ export const appRouter = router({
         bio: z.string().optional(),
         profileImageBase64: z.string().optional(),
         profileImageMimeType: z.string().optional(),
+        removeProfileImage: z.boolean().optional(),
       }))
       .mutation(async ({ input }) => {
         let profileImageUrl: string | undefined;
@@ -151,14 +152,19 @@ export const appRouter = router({
         bio: z.string().optional(),
         profileImageBase64: z.string().optional(),
         profileImageMimeType: z.string().optional(),
+        removeProfileImage: z.boolean().optional(),
       }))
       .mutation(async ({ input }) => {
-        const { id, profileImageBase64, profileImageMimeType, ...data } = input;
+        const { id, profileImageBase64, profileImageMimeType, removeProfileImage, ...data } = input;
         const updateData: Record<string, unknown> = { ...data };
-if (profileImageBase64) {
-  updateData.profileImageUrl =
-    `data:${profileImageMimeType || "image/jpeg"};base64,${profileImageBase64}`;
-}
+
+        if (removeProfileImage) {
+          updateData.profileImageUrl = null;
+        } else if (profileImageBase64) {
+          updateData.profileImageUrl =
+            `data:${profileImageMimeType || "image/jpeg"};base64,${profileImageBase64}`;
+        }
+
         return db.updateMemberProfile(id, updateData);
       }),
     delete: publicProcedure

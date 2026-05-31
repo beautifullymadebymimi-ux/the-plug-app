@@ -104,6 +104,7 @@ export default function MemberDetailScreen() {
       const interestsStr = (member as any).interests || "";
       setEditInterests(interestsStr ? interestsStr.split(", ").filter(Boolean) : []);
       setEditImage(null);
+      setRemoveImage(false);
     }
   }, [member, showEdit]);
 
@@ -343,9 +344,9 @@ export default function MemberDetailScreen() {
               {/* Profile Image */}
               <View style={[styles.formGroup, { alignItems: "center" }]}>
                 <Pressable onPress={pickImage} style={({ pressed }) => [pressed && { opacity: 0.8 }]}>
-                  {editImage ? (
+                  {editImage && !removeImage ? (
                     <Image source={{ uri: editImage.uri }} style={styles.profileImagePreview} />
-                  ) : (member as any).profileImageUrl ? (
+                  ) : (member as any).profileImageUrl && !removeImage ? (
                     <Image source={{ uri: (member as any).profileImageUrl }} style={styles.profileImagePreview} />
                   ) : (
                     <View style={[styles.profileImagePlaceholder, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -359,6 +360,27 @@ export default function MemberDetailScreen() {
                     {(member as any).profileImageUrl || editImage ? "Change Photo" : "Add Photo"}
                   </Text>
                 </Pressable>
+
+                {((member as any).profileImageUrl || editImage) && !removeImage && (
+                  <Pressable
+                    onPress={() => {
+                      setEditImage(null);
+                      setRemoveImage(true);
+                    }}
+                    style={({ pressed }) => [styles.removePhotoButton, pressed && { opacity: 0.7 }]}
+                  >
+                    <IconSymbol name="trash" size={14} color={colors.error} />
+                    <Text style={[styles.removePhotoText, { color: colors.error }]}>
+                      Remove Photo
+                    </Text>
+                  </Pressable>
+                )}
+
+                {removeImage && (
+                  <Text style={[styles.photoRemovedText, { color: colors.muted }]}>
+                    Photo will be removed when you save.
+                  </Text>
+                )}
               </View>
 
               {/* Name */}
