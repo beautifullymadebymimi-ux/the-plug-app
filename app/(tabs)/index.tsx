@@ -197,7 +197,7 @@ export default function HomeScreen() {
           <View style={styles.sectionHeader}>
             <View>
               <Text style={[styles.sectionEyebrow, { color: colors.primary }]}>LATEST</Text>
-              <Text style={[styles.sectionTitle, { color: colors.foreground }]}>What’s New</Text>
+              <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Latest Update</Text>
             </View>
             <Pressable
               onPress={() => router.push("/(tabs)/more" as any)}
@@ -268,7 +268,7 @@ export default function HomeScreen() {
               colors={colors}
               icon="bell.fill"
               title="No updates yet"
-              subtitle="New chat messages, songs, events, and announcements will appear here."
+              subtitle="The latest chat message, song, event, or announcement will appear here."
             />
           )}
         </View>
