@@ -15,6 +15,25 @@ function formatDate(dateStr: string | Date): string {
   return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 }
 
+function formatRelativeTime(dateStr?: string | Date | null): string {
+  if (!dateStr) return "";
+
+  const date = new Date(dateStr);
+  const diffMs = Date.now() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / 60000);
+
+  if (diffMinutes < 1) return "Just now";
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays < 7) return `${diffDays}d ago`;
+
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
 const NOTIFICATION_LAST_SEEN_KEY = "the_plug_notifications_last_seen";
 
 const eventTypeColors: Record<string, string> = {
@@ -76,7 +95,7 @@ export default function HomeScreen() {
 
 
         <Pressable
-          onPress={() => router.push("/(tabs)/more" as any)}
+          onPress={() => router.push("/(tabs)/more?section=notifications" as any)}
           style={({ pressed }) => [
             styles.notificationPromptCard,
             {
@@ -208,7 +227,7 @@ export default function HomeScreen() {
                 return (
                   <Pressable
                     key={item.id}
-                    onPress={() => router.push("/(tabs)/more" as any)}
+                    onPress={() => router.push("/(tabs)/more?section=notifications" as any)}
                     style={({ pressed }) => [
                       styles.whatsNewCard,
                       {
@@ -232,6 +251,11 @@ export default function HomeScreen() {
                       <Text style={[styles.whatsNewMessage, { color: colors.muted }]} numberOfLines={2}>
                         {item.message}
                       </Text>
+                      {!!item.createdAt && (
+                        <Text style={[styles.whatsNewTime, { color: colors.muted }]}>
+                          {formatRelativeTime(item.createdAt)}
+                        </Text>
+                      )}
                     </View>
 
                     <IconSymbol name="chevron.right" size={16} color={colors.muted} />
