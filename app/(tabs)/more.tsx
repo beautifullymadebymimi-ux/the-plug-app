@@ -14,7 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 const CHAT_MEMBER_KEY = "the_plug_chat_member_id";
 const NOTIFICATION_LAST_SEEN_KEY = "the_plug_notifications_last_seen";
 
-type Section = "menu" | "media" | "devotionals" | "chat" | "notifications" | "about" | "drive" | "popl" | "suggestions";
+type Section = "menu" | "media" | "devotionals" | "chat" | "notifications" | "help" | "about" | "drive" | "popl" | "suggestions";
 
 const SUGGESTION_CATEGORIES = [
   { key: "song" as const, label: "Song", color: "#8B5CF6" },
@@ -447,6 +447,80 @@ export default function MoreScreen() {
   }
 
   // ---- Chat Section ----
+  if (section === "help") {
+    const helpItems = [
+      {
+        icon: "bell.fill" as const,
+        title: "Check Notifications",
+        body: "Use More → Notifications to see new chat messages, songs, events, and app updates. Tap Mark all read when you are caught up.",
+      },
+      {
+        icon: "bubble.left.fill" as const,
+        title: "Use Group Chat",
+        body: "Go to More → Group Chat, select your name, then send messages to the team. New chat messages also create notifications.",
+      },
+      {
+        icon: "music.note" as const,
+        title: "Practice Songs",
+        body: "Open Songs, choose a song, then review lyrics, rehearsal notes, assignments, and MP3 practice tracks.",
+      },
+      {
+        icon: "music.note.list" as const,
+        title: "Use Setlists",
+        body: "Go to Songs → Setlists to view service setlists, readiness badges, and song order for rehearsal or service.",
+      },
+      {
+        icon: "person.2.fill" as const,
+        title: "Update Member Profiles",
+        body: "Use Members to view profiles, vocal parts, instruments, photos, and contact details.",
+      },
+      {
+        icon: "calendar" as const,
+        title: "RSVP for Events",
+        body: "Open an event to RSVP as Going, Maybe, or Can’t make it. Leaders can see responses on the event page.",
+      },
+    ];
+
+    return (
+      <ScreenContainer>
+        <View style={styles.subHeader}>
+          <Pressable onPress={() => setSection("menu")} style={({ pressed }) => [pressed && { opacity: 0.6 }]}>
+            <IconSymbol name="arrow.left" size={24} color={colors.foreground} />
+          </Pressable>
+          <Text style={[styles.subTitle, { color: colors.foreground }]}>How to Use The Plug</Text>
+          <View style={{ width: 28 }} />
+        </View>
+
+        <ScrollView contentContainerStyle={styles.helpContent} showsVerticalScrollIndicator={false}>
+          <View style={[styles.helpIntroCard, { backgroundColor: colors.primary + "12", borderColor: colors.primary + "35" }]}>
+            <IconSymbol name="book.fill" size={26} color={colors.primary} />
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.helpIntroTitle, { color: colors.foreground }]}>Welcome to The Plug</Text>
+              <Text style={[styles.helpIntroText, { color: colors.muted }]}>
+                Use this guide to quickly learn where to find worship updates, chat, songs, setlists, and member tools.
+              </Text>
+            </View>
+          </View>
+
+          {helpItems.map((item) => (
+            <View
+              key={item.title}
+              style={[styles.helpCard, { backgroundColor: colors.surface, borderColor: colors.border }]}
+            >
+              <View style={[styles.helpIcon, { backgroundColor: colors.primary + "18" }]}>
+                <IconSymbol name={item.icon} size={19} color={colors.primary} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.helpTitle, { color: colors.foreground }]}>{item.title}</Text>
+                <Text style={[styles.helpBody, { color: colors.muted }]}>{item.body}</Text>
+              </View>
+            </View>
+          ))}
+        </ScrollView>
+      </ScreenContainer>
+    );
+  }
+
   if (section === "notifications") {
     return (
       <ScreenContainer>
@@ -1159,6 +1233,7 @@ export default function MoreScreen() {
     { key: "suggestions" as Section, icon: "paintbrush.fill" as const, label: "Suggestion Board", desc: "Song ideas, venues & more" },
     { key: "drive" as Section, icon: "folder.fill" as const, label: "Google Drive", desc: "Music files & lyrics" },
     { key: "popl" as Section, icon: "link" as const, label: "Connect With Us", desc: "Digital card & social links" },
+    { key: "help" as Section, icon: "book.fill" as const, label: "How to Use The Plug", desc: "Quick guide for members" },
     { key: "about" as Section, icon: "gear" as const, label: "Settings", desc: "Theme, app info" },
   ];
 
@@ -1181,8 +1256,8 @@ export default function MoreScreen() {
             }}
             style={({ pressed }) => [styles.menuItem, { backgroundColor: colors.surface, borderColor: colors.border }, pressed && { opacity: 0.7 }]}
           >
-            <View style={[styles.menuIcon, { backgroundColor: item.key === "drive" ? "#4285F4" + "20" : item.key === "popl" ? "#6C5CE7" + "20" : item.key === "suggestions" ? "#F59E0B" + "20" : colors.primary + "20" }]}>
-              <IconSymbol name={item.icon} size={22} color={item.key === "drive" ? "#4285F4" : item.key === "popl" ? "#6C5CE7" : item.key === "suggestions" ? "#F59E0B" : colors.primary} />
+            <View style={[styles.menuIcon, { backgroundColor: item.key === "drive" ? "#4285F4" + "20" : item.key === "popl" ? "#6C5CE7" + "20" : item.key === "suggestions" ? "#F59E0B" + "20" : item.key === "help" ? "#10B981" + "20" : colors.primary + "20" }]}>
+              <IconSymbol name={item.icon} size={22} color={item.key === "drive" ? "#4285F4" : item.key === "popl" ? "#6C5CE7" : item.key === "suggestions" ? "#F59E0B" : item.key === "help" ? "#10B981" : colors.primary} />
             </View>
             <View style={styles.menuInfo}>
               <View style={styles.menuLabelRow}>

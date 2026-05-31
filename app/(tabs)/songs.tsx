@@ -6,7 +6,6 @@ import { useColors } from "@/hooks/use-colors";
 import { trpc } from "@/lib/trpc";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import * as Haptics from "expo-haptics";
-import { notifyNewSong } from "@/lib/notifications";
 
 export default function SongsScreen() {
   const colors = useColors();
@@ -91,7 +90,7 @@ export default function SongsScreen() {
       lyrics: newLyrics.trim() || undefined,
       youtubeUrl: newYoutubeUrl.trim() || undefined,
       spotifyUrl: newSpotifyUrl.trim() || undefined,
-      // spotifyUrl: newAppleMusicUrl.trim() || undefined,
+      appleMusicUrl: newAppleMusicUrl.trim() || undefined,
     });
   };
 
@@ -121,7 +120,6 @@ export default function SongsScreen() {
       setShowCreateSetlist(false);
       resetSetlistForm();
       if (Platform.OS !== "web") Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      notifyNewSong(variables.title, variables.artist);
     } catch {
       // Error handled by mutation
     }
@@ -237,7 +235,7 @@ export default function SongsScreen() {
                   {item.artist && <Text style={[styles.songArtist, { color: colors.muted }]} numberOfLines={1}>{item.artist}</Text>}
                 </View>
                 <View style={styles.songMeta}>
-                  {item.audioUrl && (
+                  {(item.audioUrl || (item as any).audioUrl2) && (
                     <View style={[styles.keyBadge, { backgroundColor: colors.primary + "20" }]}>
                       <IconSymbol name="waveform" size={12} color={colors.primary} />
                     </View>
@@ -258,20 +256,12 @@ export default function SongsScreen() {
                       <Text style={[styles.keyText, { color: "#1DB954" }]}>SP</Text>
                     </Pressable>
                   )}
-                  {item.spotifyUrl && (
+                  {(item as any).appleMusicUrl && (
                     <Pressable
-                      onPress={() => openSongUrl(item.spotifyUrl)}
+                      onPress={() => openSongUrl((item as any).appleMusicUrl)}
                       style={[styles.keyBadge, { backgroundColor: "#FC3C4420" }]}
                     >
                       <Text style={[styles.keyText, { color: "#FC3C44" }]}>AM</Text>
-                    </Pressable>
-                  )}
-                  {item.spotifyUrl && (
-                    <Pressable
-                      onPress={() => openSongUrl(item.spotifyUrl)}
-                      style={[styles.keyBadge, { backgroundColor: "#1DB95420" }]}
-                    >
-                      <Text style={[styles.keyText, { color: "#1DB954" }]}>SP</Text>
                     </Pressable>
                   )}
                   {item.songKey && (
