@@ -261,6 +261,7 @@ if (profileImageBase64) {
         youtubeUrl: z.string().optional(),
         spotifyUrl: z.string().optional(),
         audioUrl: z.string().optional(),
+        audioUrl2: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
         const songId = await db.createSong({ ...input, createdBy: 1 });
@@ -285,6 +286,7 @@ if (profileImageBase64) {
         youtubeUrl: z.string().optional(),
         spotifyUrl: z.string().optional(),
         audioUrl: z.string().nullable().optional(),
+        audioUrl2: z.string().nullable().optional(),
       }))
       .mutation(({ input }) => {
         const { id, ...data } = input;
@@ -296,6 +298,7 @@ if (profileImageBase64) {
         fileBase64: z.string(),
         fileName: z.string(),
         mimeType: z.string(),
+        slot: z.number().optional(),
       }))
       .mutation(async ({ input }) => {
         console.log("[Audio Upload] Starting upload", {
@@ -320,13 +323,19 @@ if (profileImageBase64) {
 
         console.log("[Audio Upload] Storage upload complete", { url });
 
-        await db.updateSong(input.songId, { audioUrl: url });
+        const updateData =
+          input.slot === 2
+            ? { audioUrl2: url }
+            : { audioUrl: url };
+
+        await db.updateSong(input.songId, updateData as any);
 
         console.log("[Audio Upload] Song audioUrl updated", {
           songId: input.songId,
+          slot: input.slot === 2 ? 2 : 1,
         });
 
-        return { audioUrl: url };
+        return { audioUrl: url, slot: input.slot === 2 ? 2 : 1 };
       }),
     delete: publicProcedure
       .input(z.object({ id: z.number() }))
@@ -375,6 +384,7 @@ if (profileImageBase64) {
         fileBase64: z.string(),
         fileName: z.string(),
         mimeType: z.string(),
+        slot: z.number().optional(),
         caption: z.string().optional(),
         type: z.enum(["photo", "video"]).default("photo"),
       }))

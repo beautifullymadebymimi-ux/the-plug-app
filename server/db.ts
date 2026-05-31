@@ -267,6 +267,7 @@ export async function createSong(data: any) {
     youtubeUrl: data?.youtubeUrl || "",
     spotifyUrl: data?.spotifyUrl || "",
     audioUrl: data?.audioUrl || "",
+    audioUrl2: (data as any)?.audioUrl2 || "",
     createdBy: 1,
   });
 

@@ -139,6 +139,7 @@ export const songs = mysqlTable("songs", {
 	createdAt: timestamp({ mode: 'string' }).default(sql`(now())`).notNull(),
 	updatedAt: timestamp({ mode: 'string' }).default(sql`(now())`).onUpdateNow().notNull(),
 	audioUrl: text(),
+	audioUrl2: text(),
 },
 (table) => [
 	primaryKey({ columns: [table.id], name: "songs_id"}),

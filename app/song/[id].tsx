@@ -177,6 +177,27 @@ export default function SongDetailScreen() {
     );
   };
 
+  const handleRemoveAudio2 = () => {
+    const removeAudio = () => {
+      updateMutation.mutate({ id: Number(id), audioUrl2: null });
+    };
+
+    if (Platform.OS === "web") {
+      const confirmed = window.confirm("Remove the second audio file from this song?");
+      if (confirmed) removeAudio();
+      return;
+    }
+
+    Alert.alert(
+      "Remove Audio 2",
+      "Remove the second audio file from this song?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Remove", style: "destructive", onPress: removeAudio },
+      ]
+    );
+  };
+
   const handleRemoveAudio = () => {
     const removeAudio = () => {
       player.pause();
@@ -199,7 +220,7 @@ export default function SongDetailScreen() {
     );
   };
 
-  const handlePickAudio = async () => {
+  const handlePickAudio = async (slot: 1 | 2 = 1) => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: "audio/*",
@@ -245,6 +266,7 @@ export default function SongDetailScreen() {
 
       uploadAudioMutation.mutate({
         songId: Number(id),
+        slot,
         fileBase64: base64Data,
         fileName: asset.name || `audio_${Date.now()}.mp3`,
         mimeType: asset.mimeType || "audio/mpeg",
@@ -347,11 +369,13 @@ export default function SongDetailScreen() {
         </View>
 
         {/* Audio Player / Upload */}
+        <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Audio Files</Text>
+
         {song.audioUrl ? (
           <View style={[styles.audioCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.audioHeader}>
               <IconSymbol name="waveform" size={20} color={colors.primary} />
-              <Text style={[styles.audioTitle, { color: colors.foreground }]}>Audio</Text>
+              <Text style={[styles.audioTitle, { color: colors.foreground }]}>Audio 1</Text>
               <Pressable onPress={handleRemoveAudio} style={({ pressed }) => [pressed && { opacity: 0.6 }]}>
                 <IconSymbol name="trash" size={16} color={colors.error} />
               </Pressable>
@@ -426,7 +450,7 @@ export default function SongDetailScreen() {
           </View>
         ) : (
           <Pressable
-            onPress={handlePickAudio}
+            onPress={() => handlePickAudio(1)}
             disabled={uploading}
             style={({ pressed }) => [styles.uploadCard, { backgroundColor: colors.primary + "08", borderColor: colors.primary + "30" }, pressed && { opacity: 0.8 }]}
           >
@@ -440,10 +464,81 @@ export default function SongDetailScreen() {
                 <View style={[styles.uploadIcon, { backgroundColor: colors.primary + "20" }]}>
                   <IconSymbol name="icloud.and.arrow.up" size={24} color={colors.primary} />
                 </View>
-                <Text style={[styles.uploadTitle, { color: colors.foreground }]}>Upload Audio</Text>
+                <Text style={[styles.uploadTitle, { color: colors.foreground }]}>Upload Audio 1</Text>
                 <Text style={[styles.uploadSubtitle, { color: colors.muted }]}>MP3 only (max 50 MB)</Text>
               </View>
             )}
+          </Pressable>
+        )}
+
+        <View style={{ height: 12 }} />
+
+        {(song as any).audioUrl2 ? (
+          <View style={[styles.audioCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <View style={styles.audioHeader}>
+              <IconSymbol name="waveform" size={20} color={colors.primary} />
+              <Text style={[styles.audioTitle, { color: colors.foreground }]}>Audio 2</Text>
+              <Pressable onPress={handleRemoveAudio2} style={({ pressed }) => [pressed && { opacity: 0.6 }]}>
+                <IconSymbol name="trash" size={16} color={colors.error} />
+              </Pressable>
+            </View>
+
+            <View style={styles.webAudioWrap}>
+              {React.createElement("audio", {
+                controls: true,
+                src: (song as any).audioUrl2,
+                preload: "metadata",
+                style: { width: "100%" },
+              })}
+
+              <Pressable
+                onPress={() => Linking.openURL((song as any).audioUrl2)}
+                style={({ pressed }) => [
+                  styles.openAudioButton,
+                  {
+                    backgroundColor: colors.primary + "12",
+                    borderColor: colors.primary + "35",
+                  },
+                  pressed && { opacity: 0.75 },
+                ]}
+              >
+                <IconSymbol name="arrow.up.right" size={16} color={colors.primary} />
+                <Text style={[styles.openAudioText, { color: colors.primary }]}>
+                  Open Audio File 2
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={handleRemoveAudio2}
+                style={({ pressed }) => [
+                  styles.removeAudioButton,
+                  {
+                    backgroundColor: colors.error + "12",
+                    borderColor: colors.error + "35",
+                  },
+                  pressed && { opacity: 0.75 },
+                ]}
+              >
+                <IconSymbol name="trash" size={16} color={colors.error} />
+                <Text style={[styles.removeAudioText, { color: colors.error }]}>
+                  Remove Audio 2
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        ) : (
+          <Pressable
+            onPress={() => handlePickAudio(2)}
+            disabled={uploading}
+            style={({ pressed }) => [styles.uploadCard, { backgroundColor: colors.primary + "08", borderColor: colors.primary + "30" }, pressed && { opacity: 0.8 }]}
+          >
+            <View style={styles.uploadContent}>
+              <View style={[styles.uploadIcon, { backgroundColor: colors.primary + "20" }]}>
+                <IconSymbol name="icloud.and.arrow.up" size={24} color={colors.primary} />
+              </View>
+              <Text style={[styles.uploadTitle, { color: colors.foreground }]}>Upload Audio 2</Text>
+              <Text style={[styles.uploadSubtitle, { color: colors.muted }]}>MP3 only (max 50 MB)</Text>
+            </View>
           </Pressable>
         )}
 
