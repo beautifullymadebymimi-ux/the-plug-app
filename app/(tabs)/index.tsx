@@ -49,6 +49,35 @@ export default function HomeScreen() {
             Rehearsals, worship moments, members, songs, and updates — all in one place.
           </Text>
 
+
+        <Pressable
+          onPress={() => router.push("/(tabs)/more" as any)}
+          style={({ pressed }) => [
+            styles.notificationPromptCard,
+            {
+              backgroundColor: colors.primary + "12",
+              borderColor: colors.primary + "35",
+            },
+            pressed && { opacity: 0.82, transform: [{ scale: 0.98 }] },
+          ]}
+        >
+          <View style={[styles.notificationPromptIcon, { backgroundColor: colors.primary + "20" }]}>
+            <IconSymbol name="bell.fill" size={22} color={colors.primary} />
+          </View>
+
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.notificationPromptTitle, { color: colors.foreground }]}>
+              Check Notifications
+            </Text>
+            <Text style={[styles.notificationPromptText, { color: colors.muted }]}>
+              See new chat messages, songs, and worship team updates.
+            </Text>
+          </View>
+
+          <IconSymbol name="chevron.right" size={20} color={colors.primary} />
+        </Pressable>
+
+
           {featuredEvent ? (
             <Pressable
               onPress={() => router.push(`/event/${featuredEvent.id}`)}
