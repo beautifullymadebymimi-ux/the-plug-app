@@ -141,11 +141,6 @@ const config: ExpoConfig = {
   runtimeVersion: {
     policy: "appVersion",
   },
-  extra: {
-    eas: {
-      projectId: "08d5dc4c-b5d9-4120-a18d-45a48da73e3f",
-    },
-  },
   experiments: {
   typedRoutes: true,
   reactCompiler: true,
