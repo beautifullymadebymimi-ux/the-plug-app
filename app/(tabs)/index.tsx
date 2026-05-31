@@ -1,9 +1,10 @@
-import { ScrollView, Text, View, Pressable, StyleSheet, Image, RefreshControl } from "react-native";
+import { ScrollView, Text, View, Pressable, StyleSheet, Image, RefreshControl, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
 import { useColors } from "@/hooks/use-colors";
 import { trpc } from "@/lib/trpc";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { useEffect, useState } from "react";
 
 function getGreeting(): string {
   return "Welcome back";
@@ -13,6 +14,8 @@ function formatDate(dateStr: string | Date): string {
   const d = new Date(dateStr);
   return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
 }
+
+const NOTIFICATION_LAST_SEEN_KEY = "the_plug_notifications_last_seen";
 
 const eventTypeColors: Record<string, string> = {
   rehearsal: "#22C55E",
@@ -25,8 +28,28 @@ export default function HomeScreen() {
   const colors = useColors();
   const router = useRouter();
   const { data: feed, isLoading, refetch } = trpc.home.feed.useQuery();
+  const { data: notificationsList } = trpc.notifications.list.useQuery(undefined, {
+    refetchInterval: 5000,
+  });
+  const [lastSeenNotificationsAt, setLastSeenNotificationsAt] = useState(0);
+
+  useEffect(() => {
+    try {
+      if (Platform.OS === "web" && typeof window !== "undefined") {
+        const saved = window.localStorage.getItem(NOTIFICATION_LAST_SEEN_KEY);
+        setLastSeenNotificationsAt(saved ? Number(saved) || 0 : 0);
+      }
+    } catch (error) {
+      console.warn("Could not load notification read state", error);
+    }
+  }, []);
 
   const featuredEvent = feed?.upcomingEvents?.[0];
+  const notifications = notificationsList || [];
+  const unreadNotificationCount = notifications.filter((item: any) => {
+    const createdAt = item.createdAt ? new Date(item.createdAt).getTime() : 0;
+    return createdAt > lastSeenNotificationsAt;
+  }).length;
 
   return (
     <ScreenContainer>
@@ -63,14 +86,25 @@ export default function HomeScreen() {
         >
           <View style={[styles.notificationPromptIcon, { backgroundColor: colors.primary + "20" }]}>
             <IconSymbol name="bell.fill" size={22} color={colors.primary} />
+            {unreadNotificationCount > 0 && (
+              <View style={[styles.homeUnreadBadge, { backgroundColor: colors.primary }]}>
+                <Text style={styles.homeUnreadBadgeText}>
+                  {unreadNotificationCount > 99 ? "99+" : unreadNotificationCount}
+                </Text>
+              </View>
+            )}
           </View>
 
           <View style={{ flex: 1 }}>
             <Text style={[styles.notificationPromptTitle, { color: colors.foreground }]}>
-              Check Notifications
+              {unreadNotificationCount > 0
+                ? `${unreadNotificationCount} unread notification${unreadNotificationCount === 1 ? "" : "s"}`
+                : "Check Notifications"}
             </Text>
             <Text style={[styles.notificationPromptText, { color: colors.muted }]}>
-              See new chat messages, songs, and worship team updates.
+              {unreadNotificationCount > 0
+                ? "Tap to review what’s new in The Plug."
+                : "See new chat messages, songs, and worship team updates."}
             </Text>
           </View>
 
@@ -316,6 +350,23 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
+  },
+  homeUnreadBadge: {
+    position: "absolute",
+    top: -5,
+    right: -6,
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 5,
+  },
+  homeUnreadBadgeText: {
+    color: "#FFF",
+    fontSize: 10,
+    fontWeight: "900",
   },
   notificationPromptTitle: {
     fontSize: 16,
