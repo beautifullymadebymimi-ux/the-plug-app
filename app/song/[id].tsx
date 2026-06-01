@@ -476,48 +476,86 @@ export default function SongDetailScreen() {
               </Pressable>
             </View>
 
-            <View style={styles.webAudioWrap}>
-              {React.createElement("audio", {
-                controls: true,
-                src: (song as any).audioUrl2,
-                preload: "metadata",
-                style: { width: "100%" },
-              })}
+            {Platform.OS === "web" ? (
+              <View style={styles.webAudioWrap}>
+                {React.createElement("audio", {
+                  controls: true,
+                  src: (song as any).audioUrl2,
+                  preload: "metadata",
+                  style: { width: "100%" },
+                })}
 
-              <Pressable
-                onPress={() => Linking.openURL((song as any).audioUrl2)}
-                style={({ pressed }) => [
-                  styles.openAudioButton,
-                  {
-                    backgroundColor: colors.primary + "12",
-                    borderColor: colors.primary + "35",
-                  },
-                  pressed && { opacity: 0.75 },
-                ]}
-              >
-                <IconSymbol name="arrow.up.right" size={16} color={colors.primary} />
-                <Text style={[styles.openAudioText, { color: colors.primary }]}>
-                  Open Audio File 2
-                </Text>
-              </Pressable>
+                <Pressable
+                  onPress={() => Linking.openURL((song as any).audioUrl2)}
+                  style={({ pressed }) => [
+                    styles.openAudioButton,
+                    {
+                      backgroundColor: colors.primary + "12",
+                      borderColor: colors.primary + "35",
+                    },
+                    pressed && { opacity: 0.75 },
+                  ]}
+                >
+                  <IconSymbol name="arrow.up.right" size={16} color={colors.primary} />
+                  <Text style={[styles.openAudioText, { color: colors.primary }]}>
+                    Open Audio File 2
+                  </Text>
+                </Pressable>
 
-              <Pressable
-                onPress={handleRemoveAudio2}
-                style={({ pressed }) => [
-                  styles.removeAudioButton,
-                  {
-                    backgroundColor: colors.error + "12",
-                    borderColor: colors.error + "35",
-                  },
-                  pressed && { opacity: 0.75 },
-                ]}
-              >
-                <IconSymbol name="trash" size={16} color={colors.error} />
-                <Text style={[styles.removeAudioText, { color: colors.error }]}>
-                  Remove Audio 2
-                </Text>
-              </Pressable>
-            </View>
+                <Pressable
+                  onPress={handleRemoveAudio2}
+                  style={({ pressed }) => [
+                    styles.removeAudioButton,
+                    {
+                      backgroundColor: colors.error + "12",
+                      borderColor: colors.error + "35",
+                    },
+                    pressed && { opacity: 0.75 },
+                  ]}
+                >
+                  <IconSymbol name="trash" size={16} color={colors.error} />
+                  <Text style={[styles.removeAudioText, { color: colors.error }]}>
+                    Remove Audio 2
+                  </Text>
+                </Pressable>
+              </View>
+            ) : (
+              <View style={styles.webAudioWrap}>
+                <Pressable
+                  onPress={() => Linking.openURL((song as any).audioUrl2)}
+                  style={({ pressed }) => [
+                    styles.openAudioButton,
+                    {
+                      backgroundColor: colors.primary + "12",
+                      borderColor: colors.primary + "35",
+                    },
+                    pressed && { opacity: 0.75 },
+                  ]}
+                >
+                  <IconSymbol name="arrow.up.right" size={16} color={colors.primary} />
+                  <Text style={[styles.openAudioText, { color: colors.primary }]}>
+                    Open Audio File 2
+                  </Text>
+                </Pressable>
+
+                <Pressable
+                  onPress={handleRemoveAudio2}
+                  style={({ pressed }) => [
+                    styles.removeAudioButton,
+                    {
+                      backgroundColor: colors.error + "12",
+                      borderColor: colors.error + "35",
+                    },
+                    pressed && { opacity: 0.75 },
+                  ]}
+                >
+                  <IconSymbol name="trash" size={16} color={colors.error} />
+                  <Text style={[styles.removeAudioText, { color: colors.error }]}>
+                    Remove Audio 2
+                  </Text>
+                </Pressable>
+              </View>
+            )}
           </View>
         ) : (
           <Pressable
