@@ -59,7 +59,7 @@ async function sendExpoPushNotifications(input: {
 }
 
 
-const appRouter = router({
+export const appRouter = router({
   system: systemRouter,
 
   auth: router({
