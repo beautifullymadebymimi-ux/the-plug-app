@@ -8,7 +8,6 @@ import { IconSymbol } from "@/components/ui/icon-symbol";
 import * as Haptics from "expo-haptics";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
-import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 
 const KEYS = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B",
   "Cm", "C#m", "Dm", "D#m", "Em", "Fm", "F#m", "Gm", "G#m", "Am", "A#m", "Bm"];
@@ -126,11 +125,6 @@ export default function SongDetailScreen() {
   const [editAppleMusicUrl, setEditAppleMusicUrl] = useState("");
   const [uploading, setUploading] = useState(false);
 
-  // Audio player for the song's audio file
-  const audioSource = song?.audioUrl ? { uri: song.audioUrl } : undefined;
-  const player = useAudioPlayer(audioSource);
-  const status = useAudioPlayerStatus(player);
-
   const updateMutation = trpc.songs.update.useMutation({
     onSuccess: () => {
       refetch();
@@ -200,7 +194,6 @@ export default function SongDetailScreen() {
 
   const handleRemoveAudio = () => {
     const removeAudio = () => {
-      player.pause();
       updateMutation.mutate({ id: Number(id), audioUrl: null });
     };
 
@@ -322,13 +315,13 @@ export default function SongDetailScreen() {
 
   const handlePlayPause = () => {
     if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (status.playing) {
-      player.pause();
+    if (false) {
+      ;
     } else {
       if (status.currentTime >= status.duration && status.duration > 0) {
         player.seekTo(0);
       }
-      player.play();
+      song.audioUrl && Linking.openURL(song.audioUrl);
     }
   };
 
@@ -412,7 +405,7 @@ export default function SongDetailScreen() {
                   onPress={handlePlayPause}
                   style={({ pressed }) => [styles.playButton, { backgroundColor: colors.primary }, pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] }]}
                 >
-                  <IconSymbol name={status.playing ? "pause.fill" : "play.fill"} size={24} color="#FFF" />
+                  <IconSymbol name={false ? "pause.fill" : "play.fill"} size={24} color="#FFF" />
                 </Pressable>
                 <View style={styles.audioProgress}>
                   <View style={[styles.progressBar, { backgroundColor: colors.border }]}>

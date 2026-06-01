@@ -6,6 +6,7 @@ import { useColors } from "@/hooks/use-colors";
 import { trpc } from "@/lib/trpc";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import * as Haptics from "expo-haptics";
+import * as SecureStore from "expo-secure-store";
 import * as ImagePicker from "expo-image-picker";
 import { notifyNewDevotional } from "@/lib/notifications";
 import { useThemeContext } from "@/lib/theme-provider";
@@ -251,7 +252,7 @@ export default function MoreScreen() {
   });
   const unreadNotificationCount = unreadNotifications.length;
 
-  const markNotificationsRead = () => {
+  const markNotificationsRead = async () => {
     const newestNotificationTime = Math.max(
       Date.now(),
       ...notifications.map((item: any) =>
@@ -266,6 +267,11 @@ export default function MoreScreen() {
     try {
       if (Platform.OS === "web" && typeof window !== "undefined") {
         window.localStorage.setItem(
+          NOTIFICATION_LAST_SEEN_KEY,
+          String(readThroughTime)
+        );
+      } else {
+        await SecureStore.setItemAsync(
           NOTIFICATION_LAST_SEEN_KEY,
           String(readThroughTime)
         );

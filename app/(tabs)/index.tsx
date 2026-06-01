@@ -5,6 +5,9 @@ import { useColors } from "@/hooks/use-colors";
 import { trpc } from "@/lib/trpc";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { useEffect, useState } from "react";
+import * as SecureStore from "expo-secure-store";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 
 function getGreeting(): string {
   return "Welcome back";
@@ -52,16 +55,31 @@ export default function HomeScreen() {
   });
   const [lastSeenNotificationsAt, setLastSeenNotificationsAt] = useState(0);
 
-  useEffect(() => {
+  const loadNotificationReadState = useCallback(async () => {
     try {
+      let saved: string | null = null;
+
       if (Platform.OS === "web" && typeof window !== "undefined") {
-        const saved = window.localStorage.getItem(NOTIFICATION_LAST_SEEN_KEY);
-        setLastSeenNotificationsAt(saved ? Number(saved) || 0 : 0);
+        saved = window.localStorage.getItem(NOTIFICATION_LAST_SEEN_KEY);
+      } else {
+        saved = await SecureStore.getItemAsync(NOTIFICATION_LAST_SEEN_KEY);
       }
+
+      setLastSeenNotificationsAt(saved ? Number(saved) || 0 : 0);
     } catch (error) {
       console.warn("Could not load notification read state", error);
     }
   }, []);
+
+  useEffect(() => {
+    loadNotificationReadState();
+  }, [loadNotificationReadState]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadNotificationReadState();
+    }, [loadNotificationReadState])
+  );
 
   const featuredEvent = feed?.upcomingEvents?.[0];
   const notifications = notificationsList || [];
