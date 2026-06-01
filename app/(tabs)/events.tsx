@@ -115,6 +115,38 @@ useFocusEffect(
     refetch();
   }, [refetch])
 );
+
+  const { upcomingEvents, pastEvents, groupedEvents } = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const sorted = [...(eventsList || [])].sort(
+      (a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+
+    const upcoming = sorted.filter((event: any) => {
+      const eventDate = new Date(event.date);
+      eventDate.setHours(0, 0, 0, 0);
+      return eventDate >= today;
+    });
+
+    const past = sorted.filter((event: any) => {
+      const eventDate = new Date(event.date);
+      eventDate.setHours(0, 0, 0, 0);
+      return eventDate < today;
+    });
+
+    return {
+      upcomingEvents: upcoming,
+      pastEvents: past,
+      groupedEvents: [
+        ...(upcoming.length ? [{ type: "section" as const, id: "upcoming", title: "Upcoming Events" }] : []),
+        ...upcoming.map((event: any) => ({ type: "event" as const, event })),
+        ...(past.length ? [{ type: "section" as const, id: "past", title: "Past Events" }] : []),
+        ...past.map((event: any) => ({ type: "event" as const, event })),
+      ],
+    };
+  }, [eventsList]);
   const createMutation = trpc.events.create.useMutation({
     onSuccess: (_data, variables) => {
       refetch();
@@ -193,8 +225,8 @@ useFocusEffect(
       </View>
 
       <FlatList
-        data={eventsList || []}
-        keyExtractor={(item) => item.id.toString()}
+        data={groupedEvents}
+        keyExtractor={(item: any) => event.type === "section" ? item.id : item.event.id.toString()}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
@@ -204,44 +236,63 @@ useFocusEffect(
             <Text style={[styles.emptySubtitle, { color: colors.muted }]}>Tap + to create your first event</Text>
           </View>
         }
-        renderItem={({ item }) => (
+        renderItem={({ item }: any) => {
+          if (event.type === "section") {
+            return (
+              <View style={styles.eventSectionHeader}>
+                <Text style={[styles.eventSectionTitle, { color: colors.foreground }]}>
+                  {event.title}
+                </Text>
+                <Text style={[styles.eventSectionSubtitle, { color: colors.muted }]}>
+                  {event.title === "Upcoming Events"
+                    ? `${upcomingEvents.length} upcoming`
+                    : `${pastEvents.length} past`}
+                </Text>
+              </View>
+            );
+          }
+
+          const event = item.event;
+
+          return (
           <Pressable
-            onPress={() => router.push(`/event/${item.id}` as any)}
+            onPress={() => router.push(`/event/${event.id}` as any)}
             style={({ pressed }) => [styles.eventCard, { backgroundColor: colors.surface, borderColor: colors.border }, pressed && { opacity: 0.7 }]}
           >
-            {(item as any).imageUrl && (
-              <Image source={{ uri: (item as any).imageUrl }} style={styles.eventImage} />
+            {(event as any).imageUrl && (
+              <Image source={{ uri: (event as any).imageUrl }} style={styles.eventImage} />
             )}
             <View style={styles.eventCardBody}>
               <View style={styles.eventCardLeft}>
-                <View style={[styles.dateBadge, { backgroundColor: eventTypeColors[item.type] + "20" }]}>
-                  <Text style={[styles.dateMonth, { color: eventTypeColors[item.type] }]}>
-                    {new Date(item.date).toLocaleDateString("en-US", { month: "short" }).toUpperCase()}
+                <View style={[styles.dateBadge, { backgroundColor: eventTypeColors[event.type] + "20" }]}>
+                  <Text style={[styles.dateMonth, { color: eventTypeColors[event.type] }]}>
+                    {new Date(event.date).toLocaleDateString("en-US", { month: "short" }).toUpperCase()}
                   </Text>
-                  <Text style={[styles.dateDay, { color: eventTypeColors[item.type] }]}>
-                    {new Date(item.date).getDate()}
+                  <Text style={[styles.dateDay, { color: eventTypeColors[event.type] }]}>
+                    {new Date(event.date).getDate()}
                   </Text>
                 </View>
               </View>
               <View style={styles.eventCardRight}>
-                <View style={[styles.typeBadge, { backgroundColor: eventTypeColors[item.type] }]}>
-                  <Text style={styles.typeText}>{item.type}</Text>
+                <View style={[styles.typeBadge, { backgroundColor: eventTypeColors[event.type] }]}>
+                  <Text style={styles.typeText}>{event.type}</Text>
                 </View>
-                <Text style={[styles.eventTitle, { color: colors.foreground }]} numberOfLines={1}>{item.title}</Text>
+                <Text style={[styles.eventTitle, { color: colors.foreground }]} numberOfLines={1}>{event.title}</Text>
                 <View style={styles.metaRow}>
                   <IconSymbol name="clock" size={13} color={colors.muted} />
-                  <Text style={[styles.metaText, { color: colors.muted }]}>{formatDate(item.date)} at {formatTime(item.date)}</Text>
+                  <Text style={[styles.metaText, { color: colors.muted }]}>{formatDate(event.date)} at {formatTime(event.date)}</Text>
                 </View>
-                {item.location && (
+                {event.location && (
                   <View style={styles.metaRow}>
                     <IconSymbol name="mappin" size={13} color={colors.muted} />
-                    <Text style={[styles.metaText, { color: colors.muted }]} numberOfLines={1}>{item.location}</Text>
+                    <Text style={[styles.metaText, { color: colors.muted }]} numberOfLines={1}>{event.location}</Text>
                   </View>
                 )}
               </View>
             </View>
           </Pressable>
-        )}
+          );
+        }}
       />
 
       {/* Create Event Modal */}
