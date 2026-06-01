@@ -50,7 +50,7 @@ const config: ExpoConfig = {
   ios: {
     supportsTablet: true,
     bundleIdentifier: env.iosBundleId,
-    buildNumber: "6",
+    buildNumber: "7",
     "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -65,7 +65,7 @@ const config: ExpoConfig = {
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
-    versionCode: 6,
+    versionCode: 7,
     permissions: ["POST_NOTIFICATIONS"],
     intentFilters: [
       {
