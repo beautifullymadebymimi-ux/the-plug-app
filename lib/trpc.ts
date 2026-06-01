@@ -3,6 +3,8 @@ import { httpBatchLink } from "@trpc/client";
 import superjson from "superjson";
 import type { AppRouter } from "@/server/routers";
 import { getApiBaseUrl } from "@/constants/oauth";
+import { Platform } from "react-native";
+import * as Auth from "@/lib/_core/auth";
 
 export const trpc = createTRPCReact<AppRouter>();
 
@@ -12,10 +14,16 @@ export function createTRPCClient() {
       httpBatchLink({
         url: `${getApiBaseUrl()}/api/trpc`,
         transformer: superjson,
-        fetch(url, options) {
+        async fetch(url, options) {
+          const sessionToken = Platform.OS === "web" ? null : await Auth.getSessionToken();
+
           return fetch(url, {
             ...options,
             credentials: "include",
+            headers: {
+              ...(options?.headers || {}),
+              ...(sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {}),
+            },
           });
         },
       }),
