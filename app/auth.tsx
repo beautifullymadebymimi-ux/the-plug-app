@@ -17,13 +17,18 @@ export default function AuthScreen() {
   const [loginLoading, setLoginLoading] = useState(false);
 
   const signupMutation = trpc.auth.signup.useMutation({
-    onSuccess: async () => {
+    onSuccess: async (data: any) => {
       if (data.sessionToken) {
         await Auth.setSessionToken(data.sessionToken);
       }
 
-      if (data.sessionToken) {
-        await Auth.setSessionToken(data.sessionToken);
+      if (data.user) {
+        await Auth.setUserInfo({
+          ...data.user,
+          lastSignedIn: data.user.lastSignedIn ? new Date(data.user.lastSignedIn) : new Date(),
+          role: data.user.role ?? "user",
+          isActive: data.user.isActive ?? true,
+        });
       }
 
       await utils.auth.me.invalidate();
@@ -57,8 +62,13 @@ export default function AuthScreen() {
         await Auth.setSessionToken(data.sessionToken);
       }
 
-      if (data.sessionToken) {
-        await Auth.setSessionToken(data.sessionToken);
+      if (data.user) {
+        await Auth.setUserInfo({
+          ...data.user,
+          lastSignedIn: data.user.lastSignedIn ? new Date(data.user.lastSignedIn) : new Date(),
+          role: data.user.role ?? "user",
+          isActive: data.user.isActive ?? true,
+        });
       }
 
       await utils.auth.me.invalidate();
