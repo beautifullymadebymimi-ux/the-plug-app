@@ -142,37 +142,7 @@ useFocusEffect(
     };
   }, [eventsList]);
 
-  const { upcomingEvents, pastEvents, groupedEvents } = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
 
-    const sorted = [...(eventsList || [])].sort(
-      (a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime()
-    );
-
-    const upcoming = sorted.filter((event: any) => {
-      const eventDate = new Date(event.date);
-      eventDate.setHours(0, 0, 0, 0);
-      return eventDate >= today;
-    });
-
-    const past = sorted.filter((event: any) => {
-      const eventDate = new Date(event.date);
-      eventDate.setHours(0, 0, 0, 0);
-      return eventDate < today;
-    });
-
-    return {
-      upcomingEvents: upcoming,
-      pastEvents: past,
-      groupedEvents: [
-        ...(upcoming.length ? [{ type: "section" as const, id: "upcoming", title: "Upcoming Events" }] : []),
-        ...upcoming.map((event: any) => ({ type: "event" as const, event })),
-        ...(past.length ? [{ type: "section" as const, id: "past", title: "Past Events" }] : []),
-        ...past.map((event: any) => ({ type: "event" as const, event })),
-      ],
-    };
-  }, [eventsList]);
   const createMutation = trpc.events.create.useMutation({
     onSuccess: (_data, variables) => {
       refetch();
