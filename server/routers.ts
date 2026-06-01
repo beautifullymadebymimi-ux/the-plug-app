@@ -479,11 +479,34 @@ export const appRouter = router({
         content: z.string().min(1),
         date: z.string(),
       }))
-      .mutation(({ input }) => db.createDevotional({
-        ...input,
-        date: new Date(input.date),
-        createdBy: 0,
-      })),
+      .mutation(async ({ input }) => {
+        const devotionalId = await db.createDevotional({
+          ...input,
+          date: new Date(input.date),
+          createdBy: 0,
+        });
+
+        try {
+          const title = "New Daily Devotional";
+          const message = `Today’s devotional is ready: ${input.title}`;
+
+          await db.createNotification({
+            title,
+            message,
+            type: "devotional",
+          });
+
+          await sendExpoPushNotifications({
+            title,
+            body: message,
+            type: "devotional",
+          });
+        } catch (error) {
+          console.error("[Devotional Notification] Failed to send notification:", error);
+        }
+
+        return devotionalId;
+      }),
     update: publicProcedure
       .input(z.object({
         id: z.number(),
