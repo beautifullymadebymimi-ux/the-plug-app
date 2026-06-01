@@ -693,6 +693,24 @@ export async function deleteMemberProfile(id: number) {
 }
 
 
+
+export async function getAllExpoPushTokens() {
+  const db = await getDb();
+  if (!db) return [];
+
+  const rows = await db
+    .select({
+      id: users.id,
+      expoPushToken: users.expoPushToken,
+    })
+    .from(users);
+
+  return rows
+    .map((row) => row.expoPushToken)
+    .filter((token): token is string => Boolean(token));
+}
+
+
 export async function getNotifications(limit = 50) {
   const db = await getDb();
   if (!db) return [];

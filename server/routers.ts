@@ -10,7 +10,56 @@ import * as db from "./db";
 import { storagePut } from "./storage";
 import { notifyOwner } from "./_core/notification";
 
-export const appRouter = router({
+export 
+async function sendExpoPushNotifications(input: {
+  title: string;
+  body: string;
+  type?: string;
+}) {
+  try {
+    const tokens = await db.getAllExpoPushTokens();
+
+    if (!tokens.length) {
+      console.log("[Push] No Expo push tokens saved.");
+      return;
+    }
+
+    const messages = tokens
+      .filter((token) => token.startsWith("ExponentPushToken[") || token.startsWith("ExpoPushToken["))
+      .map((token) => ({
+        to: token,
+        sound: "default",
+        title: input.title,
+        body: input.body,
+        data: {
+          type: input.type || "notification",
+        },
+      }));
+
+    if (!messages.length) {
+      console.log("[Push] No valid Expo push tokens found.");
+      return;
+    }
+
+    const response = await fetch("https://exp.host/--/api/v2/push/send", {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Accept-Encoding": "gzip, deflate",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(messages),
+    });
+
+    const result = await response.json();
+    console.log("[Push] Sent Expo push notifications:", result);
+  } catch (error) {
+    console.error("[Push] Failed to send Expo push notifications:", error);
+  }
+}
+
+
+const appRouter = router({
   system: systemRouter,
 
   auth: router({
@@ -479,6 +528,12 @@ export const appRouter = router({
           await db.createNotification({
             title: "💬 New Chat Message",
             message: `${senderName}: ${preview}`,
+            type: "chat",
+          });
+
+          await sendExpoPushNotifications({
+            title: "💬 New Chat Message",
+            body: `${senderName}: ${preview}`,
             type: "chat",
           });
         } catch (error) {
