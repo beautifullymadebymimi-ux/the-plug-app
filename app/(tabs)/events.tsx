@@ -116,6 +116,32 @@ useFocusEffect(
   }, [refetch])
 );
 
+  const { upcomingEvents, pastEvents } = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const sorted = [...(eventsList || [])].sort(
+      (a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+
+    const upcoming = sorted.filter((event: any) => {
+      const eventDate = new Date(event.date);
+      eventDate.setHours(0, 0, 0, 0);
+      return eventDate >= today;
+    });
+
+    const past = sorted.filter((event: any) => {
+      const eventDate = new Date(event.date);
+      eventDate.setHours(0, 0, 0, 0);
+      return eventDate < today;
+    });
+
+    return {
+      upcomingEvents: upcoming,
+      pastEvents: past,
+    };
+  }, [eventsList]);
+
   const { upcomingEvents, pastEvents, groupedEvents } = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -212,6 +238,50 @@ useFocusEffect(
     });
   };
 
+  const renderEventCard = (event: any) => {
+    const eventColor = eventTypeColors[event.type] || eventTypeColors.other;
+
+    return (
+      <Pressable
+        key={event.id}
+        onPress={() => router.push(`/event/${event.id}` as any)}
+        style={({ pressed }) => [styles.eventCard, { backgroundColor: colors.surface, borderColor: colors.border }, pressed && { opacity: 0.7 }]}
+      >
+        {(event as any).imageUrl && (
+          <Image source={{ uri: (event as any).imageUrl }} style={styles.eventImage} />
+        )}
+        <View style={styles.eventCardBody}>
+          <View style={styles.eventCardLeft}>
+            <View style={[styles.dateBadge, { backgroundColor: eventColor + "20" }]}>
+              <Text style={[styles.dateMonth, { color: eventColor }]}>
+                {new Date(event.date).toLocaleDateString("en-US", { month: "short" }).toUpperCase()}
+              </Text>
+              <Text style={[styles.dateDay, { color: eventColor }]}>
+                {new Date(event.date).getDate()}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.eventCardRight}>
+            <View style={[styles.typeBadge, { backgroundColor: eventColor }]}>
+              <Text style={styles.typeText}>{event.type}</Text>
+            </View>
+            <Text style={[styles.eventTitle, { color: colors.foreground }]} numberOfLines={1}>{event.title}</Text>
+            <View style={styles.metaRow}>
+              <IconSymbol name="clock" size={13} color={colors.muted} />
+              <Text style={[styles.metaText, { color: colors.muted }]}>{formatDate(event.date)} at {formatTime(event.date)}</Text>
+            </View>
+            {event.location && (
+              <View style={styles.metaRow}>
+                <IconSymbol name="mappin" size={13} color={colors.muted} />
+                <Text style={[styles.metaText, { color: colors.muted }]} numberOfLines={1}>{event.location}</Text>
+              </View>
+            )}
+          </View>
+        </View>
+      </Pressable>
+    );
+  };
+
   return (
     <ScreenContainer>
       <View style={styles.header}>
@@ -224,76 +294,50 @@ useFocusEffect(
         </Pressable>
       </View>
 
-      <FlatList
-        data={groupedEvents}
-        keyExtractor={(item: any) => event.type === "section" ? item.id : item.event.id.toString()}
+      <ScrollView
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
+      >
+        {upcomingEvents.length === 0 && pastEvents.length === 0 ? (
           <View style={[styles.emptyState, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <IconSymbol name="calendar" size={48} color={colors.muted} />
             <Text style={[styles.emptyTitle, { color: colors.foreground }]}>No events yet</Text>
             <Text style={[styles.emptySubtitle, { color: colors.muted }]}>Tap + to create your first event</Text>
           </View>
-        }
-        renderItem={({ item }: any) => {
-          if (event.type === "section") {
-            return (
-              <View style={styles.eventSectionHeader}>
-                <Text style={[styles.eventSectionTitle, { color: colors.foreground }]}>
-                  {event.title}
-                </Text>
-                <Text style={[styles.eventSectionSubtitle, { color: colors.muted }]}>
-                  {event.title === "Upcoming Events"
-                    ? `${upcomingEvents.length} upcoming`
-                    : `${pastEvents.length} past`}
-                </Text>
-              </View>
-            );
-          }
-
-          const event = item.event;
-
-          return (
-          <Pressable
-            onPress={() => router.push(`/event/${event.id}` as any)}
-            style={({ pressed }) => [styles.eventCard, { backgroundColor: colors.surface, borderColor: colors.border }, pressed && { opacity: 0.7 }]}
-          >
-            {(event as any).imageUrl && (
-              <Image source={{ uri: (event as any).imageUrl }} style={styles.eventImage} />
-            )}
-            <View style={styles.eventCardBody}>
-              <View style={styles.eventCardLeft}>
-                <View style={[styles.dateBadge, { backgroundColor: eventTypeColors[event.type] + "20" }]}>
-                  <Text style={[styles.dateMonth, { color: eventTypeColors[event.type] }]}>
-                    {new Date(event.date).toLocaleDateString("en-US", { month: "short" }).toUpperCase()}
-                  </Text>
-                  <Text style={[styles.dateDay, { color: eventTypeColors[event.type] }]}>
-                    {new Date(event.date).getDate()}
-                  </Text>
-                </View>
-              </View>
-              <View style={styles.eventCardRight}>
-                <View style={[styles.typeBadge, { backgroundColor: eventTypeColors[event.type] }]}>
-                  <Text style={styles.typeText}>{event.type}</Text>
-                </View>
-                <Text style={[styles.eventTitle, { color: colors.foreground }]} numberOfLines={1}>{event.title}</Text>
-                <View style={styles.metaRow}>
-                  <IconSymbol name="clock" size={13} color={colors.muted} />
-                  <Text style={[styles.metaText, { color: colors.muted }]}>{formatDate(event.date)} at {formatTime(event.date)}</Text>
-                </View>
-                {event.location && (
-                  <View style={styles.metaRow}>
-                    <IconSymbol name="mappin" size={13} color={colors.muted} />
-                    <Text style={[styles.metaText, { color: colors.muted }]} numberOfLines={1}>{event.location}</Text>
-                  </View>
-                )}
-              </View>
+        ) : (
+          <>
+            <View style={styles.eventSectionHeader}>
+              <Text style={[styles.eventSectionTitle, { color: colors.foreground }]}>Upcoming Events</Text>
+              <Text style={[styles.eventSectionSubtitle, { color: colors.muted }]}>
+                {upcomingEvents.length} upcoming
+              </Text>
             </View>
-          </Pressable>
-          );
-        }}
-      />
+
+            {upcomingEvents.length > 0 ? (
+              upcomingEvents.map(renderEventCard)
+            ) : (
+              <View style={[styles.emptyMiniCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <Text style={[styles.emptyMiniText, { color: colors.muted }]}>No upcoming events</Text>
+              </View>
+            )}
+
+            <View style={styles.eventSectionHeader}>
+              <Text style={[styles.eventSectionTitle, { color: colors.foreground }]}>Past Events</Text>
+              <Text style={[styles.eventSectionSubtitle, { color: colors.muted }]}>
+                {pastEvents.length} past
+              </Text>
+            </View>
+
+            {pastEvents.length > 0 ? (
+              pastEvents.map(renderEventCard)
+            ) : (
+              <View style={[styles.emptyMiniCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <Text style={[styles.emptyMiniText, { color: colors.muted }]}>No past events</Text>
+              </View>
+            )}
+          </>
+        )}
+      </ScrollView>
 
       {/* Create Event Modal */}
       <Modal visible={showCreate} animationType="slide" transparent>

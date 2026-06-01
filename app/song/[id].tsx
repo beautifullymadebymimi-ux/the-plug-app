@@ -319,7 +319,7 @@ export default function SongDetailScreen() {
       ;
     } else {
       if (status.currentTime >= status.duration && status.duration > 0) {
-        player.seekTo(0);
+        
       }
       song.audioUrl && Linking.openURL(song.audioUrl);
     }
@@ -361,7 +361,7 @@ export default function SongDetailScreen() {
           {song.artist && <Text style={[styles.songArtist, { color: colors.muted }]}>{song.artist}</Text>}
         </View>
 
-        {/* Audio Player / Upload */}
+        {/* Audio Files */}
         <Text style={[styles.sectionTitle, { color: colors.foreground }]}>Audio Files</Text>
 
         {song.audioUrl ? (
@@ -373,6 +373,7 @@ export default function SongDetailScreen() {
                 <IconSymbol name="trash" size={16} color={colors.error} />
               </Pressable>
             </View>
+
             {Platform.OS === "web" ? (
               <View style={styles.webAudioWrap}>
                 {React.createElement("audio", {
@@ -400,46 +401,23 @@ export default function SongDetailScreen() {
                 </Pressable>
               </View>
             ) : (
-              <View style={styles.audioControls}>
-                <Pressable
-                  onPress={handlePlayPause}
-                  style={({ pressed }) => [styles.playButton, { backgroundColor: colors.primary }, pressed && { opacity: 0.9, transform: [{ scale: 0.97 }] }]}
-                >
-                  <IconSymbol name={false ? "pause.fill" : "play.fill"} size={24} color="#FFF" />
-                </Pressable>
-                <View style={styles.audioProgress}>
-                  <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
-                    <View
-                      style={[
-                        styles.progressFill,
-                        { backgroundColor: colors.primary, width: status.duration > 0 ? `${(status.currentTime / status.duration) * 100}%` : "0%" },
-                      ]}
-                    />
-                  </View>
-                  <View style={styles.timeRow}>
-                    <Text style={[styles.timeText, { color: colors.muted }]}>{formatTime(status.currentTime)}</Text>
-                    <Text style={[styles.timeText, { color: colors.muted }]}>{formatTime(status.duration)}</Text>
-                  </View>
-                </View>
-              </View>
+              <Pressable
+                onPress={() => Linking.openURL(song.audioUrl!)}
+                style={({ pressed }) => [
+                  styles.openAudioButton,
+                  {
+                    backgroundColor: colors.primary + "12",
+                    borderColor: colors.primary + "35",
+                  },
+                  pressed && { opacity: 0.75 },
+                ]}
+              >
+                <IconSymbol name="arrow.up.right" size={16} color={colors.primary} />
+                <Text style={[styles.openAudioText, { color: colors.primary }]}>
+                  Open Audio File
+                </Text>
+              </Pressable>
             )}
-
-            <Pressable
-              onPress={handleRemoveAudio}
-              style={({ pressed }) => [
-                styles.removeAudioButton,
-                {
-                  backgroundColor: colors.error + "12",
-                  borderColor: colors.error + "35",
-                },
-                pressed && { opacity: 0.75 },
-              ]}
-            >
-              <IconSymbol name="trash" size={16} color={colors.error} />
-              <Text style={[styles.removeAudioText, { color: colors.error }]}>
-                Remove Audio
-              </Text>
-            </Pressable>
           </View>
         ) : (
           <Pressable
@@ -447,20 +425,13 @@ export default function SongDetailScreen() {
             disabled={uploading}
             style={({ pressed }) => [styles.uploadCard, { backgroundColor: colors.primary + "08", borderColor: colors.primary + "30" }, pressed && { opacity: 0.8 }]}
           >
-            {uploading ? (
-              <View style={styles.uploadContent}>
-                <ActivityIndicator color={colors.primary} />
-                <Text style={[styles.uploadText, { color: colors.primary }]}>Uploading audio...</Text>
+            <View style={styles.uploadContent}>
+              <View style={[styles.uploadIcon, { backgroundColor: colors.primary + "20" }]}>
+                <IconSymbol name="icloud.and.arrow.up" size={24} color={colors.primary} />
               </View>
-            ) : (
-              <View style={styles.uploadContent}>
-                <View style={[styles.uploadIcon, { backgroundColor: colors.primary + "20" }]}>
-                  <IconSymbol name="icloud.and.arrow.up" size={24} color={colors.primary} />
-                </View>
-                <Text style={[styles.uploadTitle, { color: colors.foreground }]}>Upload Audio 1</Text>
-                <Text style={[styles.uploadSubtitle, { color: colors.muted }]}>MP3 only (max 50 MB)</Text>
-              </View>
-            )}
+              <Text style={[styles.uploadTitle, { color: colors.foreground }]}>Upload Audio 1</Text>
+              <Text style={[styles.uploadSubtitle, { color: colors.muted }]}>MP3 only (max 50 MB)</Text>
+            </View>
           </Pressable>
         )}
 
@@ -501,60 +472,24 @@ export default function SongDetailScreen() {
                     Open Audio File 2
                   </Text>
                 </Pressable>
-
-                <Pressable
-                  onPress={handleRemoveAudio2}
-                  style={({ pressed }) => [
-                    styles.removeAudioButton,
-                    {
-                      backgroundColor: colors.error + "12",
-                      borderColor: colors.error + "35",
-                    },
-                    pressed && { opacity: 0.75 },
-                  ]}
-                >
-                  <IconSymbol name="trash" size={16} color={colors.error} />
-                  <Text style={[styles.removeAudioText, { color: colors.error }]}>
-                    Remove Audio 2
-                  </Text>
-                </Pressable>
               </View>
             ) : (
-              <View style={styles.webAudioWrap}>
-                <Pressable
-                  onPress={() => Linking.openURL((song as any).audioUrl2)}
-                  style={({ pressed }) => [
-                    styles.openAudioButton,
-                    {
-                      backgroundColor: colors.primary + "12",
-                      borderColor: colors.primary + "35",
-                    },
-                    pressed && { opacity: 0.75 },
-                  ]}
-                >
-                  <IconSymbol name="arrow.up.right" size={16} color={colors.primary} />
-                  <Text style={[styles.openAudioText, { color: colors.primary }]}>
-                    Open Audio File 2
-                  </Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={handleRemoveAudio2}
-                  style={({ pressed }) => [
-                    styles.removeAudioButton,
-                    {
-                      backgroundColor: colors.error + "12",
-                      borderColor: colors.error + "35",
-                    },
-                    pressed && { opacity: 0.75 },
-                  ]}
-                >
-                  <IconSymbol name="trash" size={16} color={colors.error} />
-                  <Text style={[styles.removeAudioText, { color: colors.error }]}>
-                    Remove Audio 2
-                  </Text>
-                </Pressable>
-              </View>
+              <Pressable
+                onPress={() => Linking.openURL((song as any).audioUrl2)}
+                style={({ pressed }) => [
+                  styles.openAudioButton,
+                  {
+                    backgroundColor: colors.primary + "12",
+                    borderColor: colors.primary + "35",
+                  },
+                  pressed && { opacity: 0.75 },
+                ]}
+              >
+                <IconSymbol name="arrow.up.right" size={16} color={colors.primary} />
+                <Text style={[styles.openAudioText, { color: colors.primary }]}>
+                  Open Audio File 2
+                </Text>
+              </Pressable>
             )}
           </View>
         ) : (
