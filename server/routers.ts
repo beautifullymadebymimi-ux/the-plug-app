@@ -630,6 +630,14 @@ export const appRouter = router({
     }),
   }),
 
+  account: router({
+    deleteMyAccount: protectedProcedure
+      .mutation(async ({ ctx }) => {
+        await db.deleteUser(ctx.user.id);
+        return { success: true };
+      }),
+  }),
+
   userManagement: router({
     list: adminProcedure.query(async () => {
       return db.getAllUsersWithStatus();
