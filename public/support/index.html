@@ -4,32 +4,193 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>The Plug Worship Support</title>
+  <meta name="description" content="Support information for The Plug Worship app." />
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; background: #07110d; color: #fff; line-height: 1.6; }
-    main { max-width: 760px; margin: 0 auto; padding: 48px 22px; }
-    .card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 22px; padding: 26px; }
-    h1 { font-size: 36px; margin: 0 0 8px; }
-    h2 { margin-top: 28px; }
-    a { color: #48d17c; font-weight: 700; }
-    .muted { color: #b9c5bd; }
+    :root {
+      --bg: #07110d;
+      --card: rgba(255, 255, 255, 0.07);
+      --border: rgba(255, 255, 255, 0.14);
+      --text: #ffffff;
+      --muted: #b8c7bd;
+      --green: #48d17c;
+      --green-dark: rgba(72, 209, 124, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(72, 209, 124, 0.18), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(72, 209, 124, 0.12), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 56px 22px;
+    }
+
+    .hero {
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      color: var(--green);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: clamp(34px, 6vw, 56px);
+      line-height: 1.02;
+      margin: 0 0 14px;
+      letter-spacing: -0.04em;
+    }
+
+    .intro {
+      color: var(--muted);
+      font-size: 17px;
+      max-width: 760px;
+      margin: 0;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 26px;
+      margin-top: 18px;
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.22);
+    }
+
+    h2 {
+      font-size: 22px;
+      margin: 0 0 10px;
+      letter-spacing: -0.02em;
+    }
+
+    p {
+      margin: 0 0 14px;
+      color: var(--muted);
+    }
+
+    a {
+      color: var(--green);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    ul {
+      margin: 12px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+
+    li {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 16px;
+      padding: 13px 14px;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .button {
+      display: inline-block;
+      background: var(--green);
+      color: #06100b;
+      border-radius: 16px;
+      padding: 13px 18px;
+      font-weight: 900;
+      margin-top: 8px;
+    }
+
+    .note {
+      background: var(--green-dark);
+      border-color: rgba(72, 209, 124, 0.28);
+    }
+
+    footer {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 26px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
   <main>
-    <div class="card">
+    <section class="hero">
+      <div class="eyebrow">Support</div>
       <h1>The Plug Worship Support</h1>
-      <p class="muted">Need help with The Plug Worship? We are here to help.</p>
+      <p class="intro">
+        The Plug Worship is a private app intended for approved members of The Plug organization.
+        If you need help accessing or using the app, please contact support.
+      </p>
+    </section>
 
+    <section class="card">
       <h2>Contact Support</h2>
-      <p>For help with login, account access, events, songs, setlists, notifications, member profiles, or app support, contact:</p>
-      <p><a href="mailto:support@theplugworship.com">support@theplugworship.com</a></p>
+      <p>
+        For assistance with The Plug Worship, email:
+        <a href="mailto:support@theplugworship.com">support@theplugworship.com</a>
+      </p>
+      <a class="button" href="mailto:support@theplugworship.com">Email Support</a>
+    </section>
 
-      <h2>Account Help</h2>
-      <p>If you need help accessing your account or deleting your account, please use the account tools inside the app or contact support.</p>
+    <section class="card">
+      <h2>Help Topics</h2>
+      <p>Support is available for the following app-related topics:</p>
+      <ul>
+        <li>Login access</li>
+        <li>Account issues</li>
+        <li>Technical problems</li>
+        <li>Membership payment tracking</li>
+        <li>General app questions</li>
+      </ul>
+    </section>
 
-      <h2>Website</h2>
-      <p><a href="https://theplugworship.com">https://theplugworship.com</a></p>
-    </div>
+    <section class="card note">
+      <h2>Account Deletion</h2>
+      <p>
+        Members can delete their account inside the app through:
+      </p>
+      <p>
+        <strong>Profile or Settings &gt; Delete Account</strong>
+      </p>
+      <p>
+        The app will ask for confirmation before completing account deletion.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>App Access</h2>
+      <p>
+        The Plug Worship is only available to approved members of The Plug organization.
+        If you believe you should have access but cannot sign in, contact support with your name
+        and the email address you used to create your account.
+      </p>
+    </section>
+
+    <footer>
+      © 2026 The Plug Worship. All rights reserved.
+    </footer>
   </main>
 </body>
 </html>
