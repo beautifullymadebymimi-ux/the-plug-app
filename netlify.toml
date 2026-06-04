@@ -1,11 +1,31 @@
 [build]
-  command = "pnpm install --frozen-lockfile && npx expo export --platform web --clear"
+  command = "pnpm install --frozen-lockfile && npx expo export --platform web --clear && cp -R public/* dist/"
   publish = "dist"
 
 [build.environment]
   NODE_VERSION = "20.19.4"
   PNPM_VERSION = "9"
   EXPO_NO_TELEMETRY = "1"
+
+[[redirects]]
+  from = "/support"
+  to = "/support.html"
+  status = 200
+
+[[redirects]]
+  from = "/support/"
+  to = "/support.html"
+  status = 200
+
+[[redirects]]
+  from = "/privacy"
+  to = "/privacy.html"
+  status = 200
+
+[[redirects]]
+  from = "/privacy/"
+  to = "/privacy.html"
+  status = 200
 
 [[redirects]]
   from = "/*"
