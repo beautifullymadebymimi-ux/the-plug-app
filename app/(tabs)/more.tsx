@@ -453,6 +453,11 @@ export default function MoreScreen() {
   }
 
   // ---- Chat Section ----
+  if (section === "deleteAccount") {
+    router.push("/delete-account" as any);
+    return null;
+  }
+
   if (section === "help") {
     const quickSteps = [
       { number: "01", title: "Start on Home", body: "Catch unread notifications and the latest updates." },
@@ -1294,6 +1299,7 @@ export default function MoreScreen() {
     { key: "drive" as Section, icon: "folder.fill" as const, label: "Google Drive", desc: "Music files & lyrics" },
     { key: "popl" as Section, icon: "link" as const, label: "Connect With Us", desc: "Digital card & social links" },
     { key: "help" as Section, icon: "book.fill" as const, label: "How to Use The Plug", desc: "Quick guide for members" },
+    { key: "deleteAccount" as Section, icon: "trash" as const, label: "Delete My Account", desc: "Permanently delete your app account" },
     { key: "about" as Section, icon: "gear" as const, label: "Settings", desc: "Theme, app info" },
   ];
 
