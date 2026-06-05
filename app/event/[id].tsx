@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Text, View, Pressable, StyleSheet, ScrollView, Platform, TextInput, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ScreenContainer } from "@/components/screen-container";
@@ -16,6 +16,38 @@ const eventTypeColors: Record<string, string> = {
 };
 
 const EVENT_TYPES = ["rehearsal", "service", "special", "other"] as const;
+
+
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const DAYS_OF_WEEK = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+function getDaysInMonth(year: number, month: number): number {
+  return new Date(year, month + 1, 0).getDate();
+}
+
+function getFirstDayOfMonth(year: number, month: number): number {
+  return new Date(year, month, 1).getDay();
+}
+
+function toTimePickerParts(dateValue: string | Date) {
+  const d = new Date(dateValue);
+  let hours = d.getHours();
+  const minutes = d.getMinutes();
+  const ampm: "AM" | "PM" = hours >= 12 ? "PM" : "AM";
+
+  hours = hours % 12;
+  if (hours === 0) hours = 12;
+
+  return {
+    year: d.getFullYear(),
+    month: d.getMonth(),
+    day: d.getDate(),
+    hour: hours,
+    minute: Math.round(minutes / 5) * 5 === 60 ? 55 : Math.round(minutes / 5) * 5,
+    ampm,
+  };
+}
+
 
 export default function EventDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -56,13 +88,77 @@ const deleteMutation = trpc.events.delete.useMutation({
   const [editDescription, setEditDescription] = useState("");
   const [editLocation, setEditLocation] = useState("");
   const [editType, setEditType] = useState<string>("other");
+  const [editYear, setEditYear] = useState(new Date().getFullYear());
+  const [editMonth, setEditMonth] = useState(new Date().getMonth());
+  const [editDay, setEditDay] = useState(new Date().getDate());
+  const [editHour, setEditHour] = useState(10);
+  const [editMinute, setEditMinute] = useState(0);
+  const [editAmPm, setEditAmPm] = useState<"AM" | "PM">("AM");
+  const [showEditDatePicker, setShowEditDatePicker] = useState(false);
+  const [showEditTimePicker, setShowEditTimePicker] = useState(false);
+
+  const editCalendarDays = useMemo(() => {
+    const daysInMonth = getDaysInMonth(editYear, editMonth);
+    const firstDay = getFirstDayOfMonth(editYear, editMonth);
+    const days: (number | null)[] = [];
+
+    for (let i = 0; i < firstDay; i++) days.push(null);
+    for (let i = 1; i <= daysInMonth; i++) days.push(i);
+
+    return days;
+  }, [editYear, editMonth]);
+
+  const editDateObj = useMemo(() => {
+    let h = editHour;
+    if (editAmPm === "PM" && h !== 12) h += 12;
+    if (editAmPm === "AM" && h === 12) h = 0;
+
+    return new Date(editYear, editMonth, editDay, h, editMinute);
+  }, [editYear, editMonth, editDay, editHour, editMinute, editAmPm]);
+
+  const formattedEditDate = useMemo(() => {
+    return `${DAYS_OF_WEEK[editDateObj.getDay()]}, ${MONTHS[editMonth].slice(0, 3)} ${editDay}, ${editYear}`;
+  }, [editDateObj, editMonth, editDay, editYear]);
+
+  const formattedEditTime = useMemo(() => {
+    return `${editHour}:${editMinute.toString().padStart(2, "0")} ${editAmPm}`;
+  }, [editHour, editMinute, editAmPm]);
+
+  const prevEditMonth = () => {
+    if (editMonth === 0) {
+      setEditMonth(11);
+      setEditYear((year) => year - 1);
+    } else {
+      setEditMonth((month) => month - 1);
+    }
+  };
+
+  const nextEditMonth = () => {
+    if (editMonth === 11) {
+      setEditMonth(0);
+      setEditYear((year) => year + 1);
+    } else {
+      setEditMonth((month) => month + 1);
+    }
+  };
 
   const startEditing = () => {
     if (!event) return;
+
+    const parts = toTimePickerParts(event.date);
+
     setEditTitle(event.title);
     setEditDescription(event.description || "");
     setEditLocation(event.location || "");
     setEditType(event.type);
+    setEditYear(parts.year);
+    setEditMonth(parts.month);
+    setEditDay(parts.day);
+    setEditHour(parts.hour);
+    setEditMinute(parts.minute);
+    setEditAmPm(parts.ampm);
+    setShowEditDatePicker(false);
+    setShowEditTimePicker(false);
     setEditing(true);
   };
 
@@ -77,6 +173,7 @@ const deleteMutation = trpc.events.delete.useMutation({
       description: editDescription.trim() || undefined,
       location: editLocation.trim() || undefined,
       type: editType as any,
+      date: editDateObj.toISOString(),
     });
   };
 
@@ -191,6 +288,188 @@ const deleteMutation = trpc.events.delete.useMutation({
                   </Pressable>
                 );
               })}
+            </View>
+          </View>
+
+          {/* Date */}
+          <View style={styles.formGroup}>
+            <Text style={[styles.formLabel, { color: colors.muted }]}>Date</Text>
+            <Pressable
+              onPress={() => {
+                setShowEditDatePicker(!showEditDatePicker);
+                setShowEditTimePicker(false);
+              }}
+              style={({ pressed }) => [
+                styles.dateTimeButton,
+                {
+                  backgroundColor: colors.surface,
+                  borderColor: showEditDatePicker ? colors.primary : colors.border,
+                },
+                pressed && { opacity: 0.8 },
+              ]}
+            >
+              <IconSymbol name="calendar" size={18} color={showEditDatePicker ? colors.primary : colors.muted} />
+              <Text style={[styles.dateTimeText, { color: colors.foreground }]}>{formattedEditDate}</Text>
+              <IconSymbol name={showEditDatePicker ? "chevron.up" : "chevron.down"} size={14} color={colors.muted} />
+            </Pressable>
+
+            {showEditDatePicker && (
+              <View style={[styles.calendarContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <View style={styles.calendarHeader}>
+                  <Pressable onPress={prevEditMonth} style={({ pressed }) => [styles.calendarNav, { backgroundColor: colors.background }, pressed && { opacity: 0.7 }]}>
+                    <IconSymbol name="chevron.left" size={18} color={colors.foreground} />
+                  </Pressable>
+
+                  <Text style={[styles.calendarTitle, { color: colors.foreground }]}>
+                    {MONTHS[editMonth]} {editYear}
+                  </Text>
+
+                  <Pressable onPress={nextEditMonth} style={({ pressed }) => [styles.calendarNav, { backgroundColor: colors.background }, pressed && { opacity: 0.7 }]}>
+                    <IconSymbol name="chevron.right" size={18} color={colors.foreground} />
+                  </Pressable>
+                </View>
+
+                <View style={styles.weekDays}>
+                  {DAYS_OF_WEEK.map((day) => (
+                    <Text key={day} style={[styles.weekDayText, { color: colors.muted }]}>{day}</Text>
+                  ))}
+                </View>
+
+                <View style={styles.daysGrid}>
+                  {editCalendarDays.map((day, index) => {
+                    const isSelected = day === editDay;
+
+                    return (
+                      <Pressable
+                        key={`${day || "empty"}-${index}`}
+                        disabled={!day}
+                        onPress={() => {
+                          if (day) {
+                            setEditDay(day);
+                            if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                          }
+                        }}
+                        style={({ pressed }) => [
+                          styles.dayCell,
+                          day && isSelected && { backgroundColor: colors.primary },
+                          pressed && day && { opacity: 0.7 },
+                        ]}
+                      >
+                        {day && (
+                          <Text style={[styles.dayText, { color: isSelected ? "#FFF" : colors.foreground }]}>
+                            {day}
+                          </Text>
+                        )}
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+            )}
+          </View>
+
+          {/* Time */}
+          <View style={styles.formGroup}>
+            <Text style={[styles.formLabel, { color: colors.muted }]}>Time</Text>
+            <Pressable
+              onPress={() => {
+                setShowEditTimePicker(!showEditTimePicker);
+                setShowEditDatePicker(false);
+              }}
+              style={({ pressed }) => [
+                styles.dateTimeButton,
+                {
+                  backgroundColor: colors.surface,
+                  borderColor: showEditTimePicker ? colors.primary : colors.border,
+                },
+                pressed && { opacity: 0.8 },
+              ]}
+            >
+              <IconSymbol name="clock" size={18} color={showEditTimePicker ? colors.primary : colors.muted} />
+              <Text style={[styles.dateTimeText, { color: colors.foreground }]}>{formattedEditTime}</Text>
+              <IconSymbol name={showEditTimePicker ? "chevron.up" : "chevron.down"} size={14} color={colors.muted} />
+            </Pressable>
+
+            {showEditTimePicker && (
+              <View style={[styles.timeContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <View style={styles.timeColumn}>
+                  <Text style={[styles.timeLabel, { color: colors.muted }]}>Hour</Text>
+                  <View style={styles.timeScrollRow}>
+                    <Pressable onPress={() => setEditHour((h) => h <= 1 ? 12 : h - 1)} style={({ pressed }) => [styles.timeArrow, { backgroundColor: colors.background }, pressed && { opacity: 0.6 }]}>
+                      <IconSymbol name="chevron.up" size={16} color={colors.foreground} />
+                    </Pressable>
+                    <View style={[styles.timeValueBox, { backgroundColor: colors.primary + "15", borderColor: colors.primary + "40" }]}>
+                      <Text style={[styles.timeValue, { color: colors.primary }]}>{editHour}</Text>
+                    </View>
+                    <Pressable onPress={() => setEditHour((h) => h >= 12 ? 1 : h + 1)} style={({ pressed }) => [styles.timeArrow, { backgroundColor: colors.background }, pressed && { opacity: 0.6 }]}>
+                      <IconSymbol name="chevron.down" size={16} color={colors.foreground} />
+                    </Pressable>
+                  </View>
+                </View>
+
+                <Text style={[styles.timeColon, { color: colors.foreground }]}>:</Text>
+
+                <View style={styles.timeColumn}>
+                  <Text style={[styles.timeLabel, { color: colors.muted }]}>Min</Text>
+                  <View style={styles.timeScrollRow}>
+                    <Pressable onPress={() => setEditMinute((m) => m <= 0 ? 55 : m - 5)} style={({ pressed }) => [styles.timeArrow, { backgroundColor: colors.background }, pressed && { opacity: 0.6 }]}>
+                      <IconSymbol name="chevron.up" size={16} color={colors.foreground} />
+                    </Pressable>
+                    <View style={[styles.timeValueBox, { backgroundColor: colors.primary + "15", borderColor: colors.primary + "40" }]}>
+                      <Text style={[styles.timeValue, { color: colors.primary }]}>{editMinute.toString().padStart(2, "0")}</Text>
+                    </View>
+                    <Pressable onPress={() => setEditMinute((m) => m >= 55 ? 0 : m + 5)} style={({ pressed }) => [styles.timeArrow, { backgroundColor: colors.background }, pressed && { opacity: 0.6 }]}>
+                      <IconSymbol name="chevron.down" size={16} color={colors.foreground} />
+                    </Pressable>
+                  </View>
+                </View>
+
+                <View style={styles.timeColumn}>
+                  <Text style={[styles.timeLabel, { color: colors.muted }]}>{" "}</Text>
+                  <View style={styles.ampmColumn}>
+                    <Pressable
+                      onPress={() => {
+                        setEditAmPm("AM");
+                        if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }}
+                      style={({ pressed }) => [
+                        styles.ampmBtn,
+                        {
+                          borderColor: editAmPm === "AM" ? colors.primary : colors.border,
+                          backgroundColor: editAmPm === "AM" ? colors.primary : "transparent",
+                        },
+                        pressed && { opacity: 0.7 },
+                      ]}
+                    >
+                      <Text style={[styles.ampmText, { color: editAmPm === "AM" ? "#FFF" : colors.muted }]}>AM</Text>
+                    </Pressable>
+
+                    <Pressable
+                      onPress={() => {
+                        setEditAmPm("PM");
+                        if (Platform.OS !== "web") Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                      }}
+                      style={({ pressed }) => [
+                        styles.ampmBtn,
+                        {
+                          borderColor: editAmPm === "PM" ? colors.primary : colors.border,
+                          backgroundColor: editAmPm === "PM" ? colors.primary : "transparent",
+                        },
+                        pressed && { opacity: 0.7 },
+                      ]}
+                    >
+                      <Text style={[styles.ampmText, { color: editAmPm === "PM" ? "#FFF" : colors.muted }]}>PM</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              </View>
+            )}
+
+            <View style={[styles.dateTimeSummary, { backgroundColor: colors.primary + "10", borderColor: colors.primary + "30" }]}>
+              <IconSymbol name="calendar" size={16} color={colors.primary} />
+              <Text style={[styles.dateTimeSummaryText, { color: colors.primary }]}>
+                {formattedEditDate} at {formattedEditTime}
+              </Text>
             </View>
           </View>
 
@@ -391,6 +670,146 @@ const deleteMutation = trpc.events.delete.useMutation({
 }
 
 const styles = StyleSheet.create({
+  dateTimeButton: {
+    minHeight: 52,
+    borderWidth: 1,
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  dateTimeText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: "800",
+  },
+  calendarContainer: {
+    marginTop: 10,
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 14,
+  },
+  calendarHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  calendarNav: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  calendarTitle: {
+    fontSize: 16,
+    fontWeight: "900",
+  },
+  weekDays: {
+    flexDirection: "row",
+    marginBottom: 8,
+  },
+  weekDayText: {
+    flex: 1,
+    textAlign: "center",
+    fontSize: 11,
+    fontWeight: "900",
+  },
+  daysGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  dayCell: {
+    width: "14.285%",
+    aspectRatio: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 999,
+    marginVertical: 2,
+  },
+  dayText: {
+    fontSize: 14,
+    fontWeight: "900",
+  },
+  timeContainer: {
+    marginTop: 10,
+    borderWidth: 1,
+    borderRadius: 18,
+    padding: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+  },
+  timeColumn: {
+    alignItems: "center",
+    gap: 7,
+  },
+  timeLabel: {
+    fontSize: 11,
+    fontWeight: "900",
+  },
+  timeScrollRow: {
+    alignItems: "center",
+    gap: 6,
+  },
+  timeArrow: {
+    width: 34,
+    height: 30,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  timeValueBox: {
+    width: 54,
+    height: 42,
+    borderWidth: 1,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  timeValue: {
+    fontSize: 18,
+    fontWeight: "950",
+  },
+  timeColon: {
+    fontSize: 28,
+    fontWeight: "950",
+    marginTop: 20,
+  },
+  ampmColumn: {
+    gap: 7,
+  },
+  ampmBtn: {
+    minWidth: 48,
+    minHeight: 34,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  ampmText: {
+    fontSize: 12,
+    fontWeight: "950",
+  },
+  dateTimeSummary: {
+    marginTop: 10,
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 11,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  dateTimeSummaryText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "900",
+  },
+
   loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
   loadingText: { fontSize: 16 },
   navBar: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20, paddingBottom: 12 },
