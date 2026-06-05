@@ -182,24 +182,58 @@ export async function getAllMemberProfiles() {
   return db.select().from(memberProfiles).orderBy(memberProfiles.name);
 }
 
+
+function normalizeEventDateForClient<T extends Record<string, any>>(event: T): T {
+  const normalize = (value: any) => {
+    if (!value) return value;
+
+    if (value instanceof Date) {
+      return value.toISOString();
+    }
+
+    if (typeof value === "string") {
+      // MySQL may return UTC timestamp strings without timezone info.
+      // Add Z so the mobile app treats it as UTC and displays local time correctly.
+      if (
+        /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}/.test(value) &&
+        !value.endsWith("Z") &&
+        !/[+-]\d{2}:?\d{2}$/.test(value)
+      ) {
+        return value.replace(" ", "T") + "Z";
+      }
+    }
+
+    return value;
+  };
+
+  return {
+    ...event,
+    date: normalize(event.date),
+    endDate: normalize(event.endDate),
+  };
+}
+
+
 // ─── Events ──────────────────────────────────────────────
 export async function getEvents() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(events).orderBy(desc(events.date));
+  const rows = await db.select().from(events).orderBy(desc(events.date));
+  return rows.map(normalizeEventDateForClient);
 }
 
 export async function getUpcomingEvents(limit = 5) {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(events).where(gte(events.date, new Date())).orderBy(events.date).limit(limit);
+  const rows = await db.select().from(events).where(gte(events.date, new Date())).orderBy(events.date).limit(limit);
+  return rows.map(normalizeEventDateForClient);
 }
 
 export async function getEventById(id: number) {
   const db = await getDb();
   if (!db) return undefined;
   const result = await db.select().from(events).where(eq(events.id, id)).limit(1);
-  return result.length > 0 ? result[0] : undefined;
+  return result.length > 0 ? normalizeEventDateForClient(result[0]) : undefined;
 }
 
 export async function createEvent(data: InsertEvent) {
